@@ -1,28 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace HauntedHouse
 {
     class Program
     {
+        //Fields
         private static List<bool> conditions;
+        private static List<string> screenSave;  //save what is currently on the screen
 
+        //devMode constant
+        private const bool DEVMODE = false;
 
-
-        //Main Menu
+        //Main
         static void Main(string[] args)
         {
+            MainMenu(MethodBase.GetCurrentMethod());
+        }
+
+        static public void MainMenu(MethodBase method)
+        {
             string selection;
-            string[] title = { "New Game", "Save Game", "Load Game", "Exit" };
+            bool exitLoop = false;
+            List<string> title = new List<string>();
+            string fileLocation = @"Files\save.txt";
+            if ((method.ToString() == "Void Main(System.String[])")||(method.ToString() == "Void End()"))
+            {
+                title.Add("New Game");
+            }
+            else
+            {
+                title.Add("Continue");
+                title.Add("Save Game");
+            }
+            if (File.Exists(fileLocation))
+            {
+                title.Add("Load Game");
+            }
+            title.Add("Exit");
 
             do
             {
                 //Main menu text
                 Console.Clear();
+           
+                if (DEVMODE)
+                {
+                    Console.WriteLine(method.ToString());   //tells the location of the previous method
+                }
+
                 Console.SetCursorPosition(0, 8);
                 Console.WriteLine(String.Format("{0," + ((Console.WindowWidth / 2) + ("Welcome to Haunted House".Length / 2)) + "}", "Welcome to Haunted House"));
                 Console.SetCursorPosition(0, 10);
-                for (int i = 0; i < title.Length; i++)
+                for (int i = 0; i < title.Count; i++)
                 {
                     Console.WriteLine("{0," + ((Console.WindowWidth / 2) + (title[i].Length / 2)) + "}", title[i]);
                 }
@@ -34,35 +66,133 @@ namespace HauntedHouse
                 switch (selection)
                 {
                     case "new game":
-                        NewGame();
+                        {
+                            if (title.Contains("New Game"))
+                            {
+                                NewGame();
+                            }
+                        }
                         break;
 
                     case "save game":
-                        SaveGame();
+                        {
+                            if (title.Contains("Save Game"))
+                            {
+                                SaveGame(fileLocation, method.ToString());
+                                Console.WriteLine("Press any key to continue");
+                                Console.ReadLine();
+                            }
+                        }
                         break;
 
                     case "load game":
-                        LoadGame();
+                        {
+                            if (title.Contains("Load Game"))
+                            {
+                                LoadGame(fileLocation);
+                            }
+                        }
                         break;
 
                     case "exit":
+                        {
+                            exitLoop = true;
+                        }
+                        break;
+
+                    case "continue":
+                        {
+                            if (title.Contains("Continue"))
+                            {
+                                exitLoop = true;
+                            }
+                        }
+                        break;
 
                     default:
                         break;
                 }
-            } while (selection != "exit");
+            } while (!exitLoop);
+            if (selection == "continue")
+            { 
+            Console.Clear();
+            method.Invoke(method, null);
+            }
+            else
+            {
+                Environment.Exit(0);
+            }
         }
 
         //Save game method
-        static public void SaveGame()
+        static public void SaveGame(string fileLocation, string method)
         {
+            //What needs to be saved?
+            //method location, list of conditions, items, screensave text.
+            StreamWriter sw = new StreamWriter(fileLocation);
+            string methodName = method.Replace("Void", "");
+            methodName = methodName.Replace("()", "");
+            methodName = methodName.Replace(" ", "");
+            sw.WriteLine(methodName);
 
+            sw.WriteLine(conditions.Count);
+            foreach (bool item in conditions)
+            {
+                sw.WriteLine(item);
+            }
+            //until screensave is working, i've disabled this for now
+            /*
+            sw.WriteLine(screenSave.Count);
+            foreach (string item in screenSave)
+            {
+                sw.WriteLine(item);
+            }*/
+            sw.Close();
+            Console.WriteLine("Game is saved!");
         }
 
         //Load Game method
-        static public void LoadGame()
+        static public void LoadGame(string fileLocation)
         {
+            string methodName = "";
+            StreamReader sr = new StreamReader(@"Files\save.txt");
 
+            if (conditions != null)
+            {
+                conditions.Clear();
+            }
+            else
+            {
+                conditions = new List<bool>();
+            }
+            if (screenSave != null)
+            {
+                screenSave.Clear();
+            }
+            else
+            {
+                screenSave = new List<string>();
+            }
+            while (!sr.EndOfStream)
+            {
+                methodName = sr.ReadLine();
+                int count = Convert.ToInt16(sr.ReadLine());
+                for (int i = 0; i < count; i++)
+                {
+                    conditions.Add(Convert.ToBoolean(sr.ReadLine()));
+                }
+                //Again until screen save is working
+                /*count = Convert.ToInt16(sr.ReadLine());
+                for (int i = 0; i < count; i++)
+                {
+                    screenSave.Add(sr.ReadLine());
+                }*/
+            }
+            sr.Close();
+            Console.Clear();
+            Type type = typeof(Program);
+            MethodBase method = type.GetMethod(methodName);
+            method.Invoke(method, null);
         }
 
         //New game method
@@ -162,6 +292,12 @@ namespace HauntedHouse
                             }
                         }
                         break;
+
+                    case "main menu":
+                        {
+                            MainMenu(MethodBase.GetCurrentMethod());
+                        }
+                        break;
                 }
 
             } while (!leave);
@@ -192,16 +328,19 @@ namespace HauntedHouse
                             leave = true;
                         }
                         break;
+
+                    case "main menu":
+                        {
+                            MainMenu(MethodBase.GetCurrentMethod());
+                        }
+                        break;
                 }
 
             } while (!leave);
 
             if (left)
             {
-                Console.Clear();
-                Console.WriteLine("That is the end for now.");
-                Console.WriteLine("Press any key to go back to main menu...");
-                Console.ReadLine();
+                End();
             }
             else
             {
@@ -209,7 +348,17 @@ namespace HauntedHouse
             }
         }
 
+        //the end sequence
+        public static void End()
+        {
+            Console.Clear();
+            Console.WriteLine("That is the end for now.");
+            Console.WriteLine("Press any key to go back to main menu...");
+            Console.ReadLine();
+            MainMenu(MethodBase.GetCurrentMethod());
+        }
         //Properties
         public static List<bool> Conditions { get => conditions; set => conditions = value; }
+        public static List<string> ScreenSave { get => screenSave; set => screenSave = value; }
     }
 }
