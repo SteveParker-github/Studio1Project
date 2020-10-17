@@ -7,25 +7,28 @@ namespace HauntedHouse
 {
     class Program
     {
+        //Constants
+        private const string FILELOCATION = @"save.txt";
         //Fields
-        private static List<bool> conditions;
-        private static List<string> screenSave;  //save what is currently on the screen
+        private static List<bool> conditions;    //keeps a track of all the work the player has done. //maybe have a list of list of bool       
+        private static List<string> screenSave;  //saves what is currently on the screen
 
         //devMode constant
         private const bool DEVMODE = false;
 
-        //Main
+        //Main method
         static void Main(string[] args)
         {
             MainMenu(MethodBase.GetCurrentMethod());
         }
 
+        //Main menu
         static public void MainMenu(MethodBase method)
         {
             string selection;
             bool exitLoop = false;
             List<string> title = new List<string>();
-            string fileLocation = @"Files\save.txt";
+            string fileLocation = @"save.txt";
             if ((method.ToString() == "Void Main(System.String[])")||(method.ToString() == "Void End()"))
             {
                 title.Add("New Game");
@@ -46,9 +49,9 @@ namespace HauntedHouse
                 //Main menu text
                 Console.Clear();
            
-                if (DEVMODE)
+                if (DEVMODE) //tells the location of the previous method
                 {
-                    Console.WriteLine(method.ToString());   //tells the location of the previous method
+                    Console.WriteLine(method.ToString());
                 }
 
                 Console.SetCursorPosition(0, 8);
@@ -78,7 +81,7 @@ namespace HauntedHouse
                         {
                             if (title.Contains("Save Game"))
                             {
-                                SaveGame(fileLocation, method.ToString());
+                                SaveGame(method.ToString());
                                 Console.WriteLine("Press any key to continue");
                                 Console.ReadLine();
                             }
@@ -89,7 +92,7 @@ namespace HauntedHouse
                         {
                             if (title.Contains("Load Game"))
                             {
-                                LoadGame(fileLocation);
+                                LoadGame();
                             }
                         }
                         break;
@@ -125,11 +128,11 @@ namespace HauntedHouse
         }
 
         //Save game method
-        static public void SaveGame(string fileLocation, string method)
+        static public void SaveGame(string method)
         {
             //What needs to be saved?
             //method location, list of conditions, items, screensave text.
-            StreamWriter sw = new StreamWriter(fileLocation);
+            StreamWriter sw = new StreamWriter(FILELOCATION);
             string methodName = method.Replace("Void", "");
             methodName = methodName.Replace("()", "");
             methodName = methodName.Replace(" ", "");
@@ -152,10 +155,10 @@ namespace HauntedHouse
         }
 
         //Load Game method
-        static public void LoadGame(string fileLocation)
+        static public void LoadGame()
         {
             string methodName = "";
-            StreamReader sr = new StreamReader(@"Files\save.txt");
+            StreamReader sr = new StreamReader(FILELOCATION);
 
             if (conditions != null)
             {
