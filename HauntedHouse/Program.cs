@@ -1,4 +1,17 @@
-﻿using System;
+﻿/* Program name:            Haunted House (Work in title)
+ * Project file name:       HauntedHouse
+ * Author:                  Steve Parker, 
+ * Date:                    17/10/2020
+ * Language:                C#
+ * Platform:                Microsoft Visual Studio 2019
+ * Purpose:                 To work in a team environment by making a text based adventure game.
+ * Description:             Explore a haunted house using text commands ...
+ *
+ * known bugs:              
+ * Additional features:     
+ */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -7,18 +20,24 @@ namespace HauntedHouse
 {
     class Program
     {
+        //devMode constant
+        private const bool DEVMODE = false;
+
         //Constants
         private const string FILELOCATION = @"save.txt";
+        private const int SCREENSAVECOUNT = 20;
+
         //Fields
         private static List<bool> conditions;    //keeps a track of all the work the player has done. //maybe have a list of list of bool       
         private static List<string> screenSave;  //saves what is currently on the screen
+        private static string text;              //use this to show a message for the player
 
-        //devMode constant
-        private const bool DEVMODE = false;
 
         //Main method
         static void Main(string[] args)
         {
+            conditions = new List<bool>();
+            screenSave = new List<string>();
             MainMenu(MethodBase.GetCurrentMethod());
         }
 
@@ -28,27 +47,29 @@ namespace HauntedHouse
             string selection;
             bool exitLoop = false;
             List<string> title = new List<string>();
-            string fileLocation = @"save.txt";
-            if ((method.ToString() == "Void Main(System.String[])")||(method.ToString() == "Void End()"))
-            {
-                title.Add("New Game");
-            }
-            else
-            {
-                title.Add("Continue");
-                title.Add("Save Game");
-            }
-            if (File.Exists(fileLocation))
-            {
-                title.Add("Load Game");
-            }
-            title.Add("Exit");
 
             do
             {
                 //Main menu text
                 Console.Clear();
-           
+
+                //main menu reload
+                title.Clear();
+                if ((method.ToString() == "Void Main(System.String[])") || (method.ToString() == "Void End()"))
+                {
+                    title.Add("New Game");
+                }
+                else
+                {
+                    title.Add("Resume");
+                    title.Add("Save Game");
+                }
+                if (File.Exists(FILELOCATION))
+                {
+                    title.Add("Load Game");
+                }
+                title.Add("Exit");
+
                 if (DEVMODE) //tells the location of the previous method
                 {
                     Console.WriteLine(method.ToString());
@@ -103,9 +124,9 @@ namespace HauntedHouse
                         }
                         break;
 
-                    case "continue":
+                    case "resume":
                         {
-                            if (title.Contains("Continue"))
+                            if (title.Contains("Resume"))
                             {
                                 exitLoop = true;
                             }
@@ -116,10 +137,14 @@ namespace HauntedHouse
                         break;
                 }
             } while (!exitLoop);
-            if (selection == "continue")
-            { 
-            Console.Clear();
-            method.Invoke(method, null);
+            if (selection == "resume")
+            {
+                Console.Clear();
+                foreach (string line in screenSave)
+                {
+                    Console.WriteLine(line);
+                }
+                method.Invoke(method, null);
             }
             else
             {
@@ -143,13 +168,17 @@ namespace HauntedHouse
             {
                 sw.WriteLine(item);
             }
-            //until screensave is working, i've disabled this for now
-            /*
+
+            //removes strings if above certain count and saves each line.
+            if (screenSave.Count > SCREENSAVECOUNT)
+            {
+                screenSave.RemoveRange(0, screenSave.Count - SCREENSAVECOUNT);
+            }
             sw.WriteLine(screenSave.Count);
             foreach (string item in screenSave)
             {
                 sw.WriteLine(item);
-            }*/
+            }
             sw.Close();
             Console.WriteLine("Game is saved!");
         }
@@ -158,24 +187,16 @@ namespace HauntedHouse
         static public void LoadGame()
         {
             string methodName = "";
+            screenSave.Clear();
+
             StreamReader sr = new StreamReader(FILELOCATION);
 
+            //clears what ever is in the conditions list or creates it 
             if (conditions != null)
             {
                 conditions.Clear();
             }
-            else
-            {
-                conditions = new List<bool>();
-            }
-            if (screenSave != null)
-            {
-                screenSave.Clear();
-            }
-            else
-            {
-                screenSave = new List<string>();
-            }
+
             while (!sr.EndOfStream)
             {
                 methodName = sr.ReadLine();
@@ -184,17 +205,21 @@ namespace HauntedHouse
                 {
                     conditions.Add(Convert.ToBoolean(sr.ReadLine()));
                 }
-                //Again until screen save is working
-                /*count = Convert.ToInt16(sr.ReadLine());
+                
+                count = Convert.ToInt16(sr.ReadLine());
                 for (int i = 0; i < count; i++)
                 {
                     screenSave.Add(sr.ReadLine());
-                }*/
+                }
             }
             sr.Close();
             Console.Clear();
             Type type = typeof(Program);
             MethodBase method = type.GetMethod(methodName);
+            foreach (string line in screenSave)
+            {
+                Console.WriteLine(line);
+            }
             method.Invoke(method, null);
         }
 
@@ -215,27 +240,48 @@ namespace HauntedHouse
             conditions.Add(true); //door is locked
         }
 
+        //shows the player the message and saves it
+        public static void ShowMessage()
+        {
+            Console.WriteLine(text);
+            screenSave.Add(text);
+        }
         //First room of the game
         static public void Room1()
         {
             bool leave = false;
-
-            Console.WriteLine("It's a room with a chest. theres a door to the left");
+           
+            text = "It's a room with a chest. theres a door to the left";
+            if (screenSave.Count > 0)
+            {
+                if (text != screenSave[screenSave.Count - 1])
+                {
+                    ShowMessage();
+                }
+            }
+            else
+            {
+                ShowMessage();
+            }
 
             do
             {
-                switch (Console.ReadLine().ToLower())
+                text = Console.ReadLine().ToLower();
+                screenSave.Add(text);
+                switch (text)
                 {
                     case "open chest":
                         {
                             if (conditions[0])
                             {
-                                Console.WriteLine("The chest is already open.");
+                                text = "The chest is already open.";
+                                ShowMessage();
                             }
                             else
                             {
-                                Console.WriteLine("You open the chest. There is a key inside");
-                                Conditions[0] = true;
+                                text = "You open the chest. There is a key inside";
+                                ShowMessage();
+                                conditions[0] = true;
                             }
                         }
                         break;
@@ -244,14 +290,16 @@ namespace HauntedHouse
                         {
                             if ((!conditions[1])&&(conditions[0]))
                             {
-                                Console.WriteLine("you take the key");
+                                text = "you take the key";
+                                ShowMessage();
                                 conditions[1] = true;
                             }
                             else
                             {
                                 if (conditions[1])
                                 {
-                                    Console.WriteLine("You have already picked up the key.");
+                                    text = "You have already picked up the key.";
+                                    ShowMessage();
                                 }
                             }
                         }
@@ -261,21 +309,28 @@ namespace HauntedHouse
                         {
                             if ((conditions[1]) && (conditions[2]))
                             {
-                                Console.WriteLine("You unlock the door");
+                                text = "You unlock the door";
+                                ShowMessage();
                                 conditions[2] = false;
                             }
                             else
                             {
                                 if (conditions[2])
                                 {
-                                    Console.WriteLine("what key? you don't have a key");
+                                    text = "what key? you don't have a key";
+                                    ShowMessage();
+                                    Console.WriteLine();
                                 }
                                 else
                                 {
-                                    Console.WriteLine("The door is already unlocked. did you want to lock it?");
-                                    if (Console.ReadLine().ToLower() == "yes")
+                                    text = "The door is already unlocked. did you want to lock it?";
+                                    ShowMessage();
+                                    text = Console.ReadLine().ToLower();
+                                    screenSave.Add(text);
+                                    if (text == "yes")
                                     {
-                                        Console.WriteLine("You locked the door... for some reason.");
+                                        text = "You locked the door... for some reason.";
+                                        ShowMessage();
                                         conditions[2] = true;
                                     }
                                 }
@@ -291,13 +346,15 @@ namespace HauntedHouse
                             }
                             else
                             {
-                                Console.WriteLine("The door is locked. Maybe there is a key somewhere.");
+                                text = "The door is locked. Maybe there is a key somewhere.";
+                                ShowMessage();
                             }
                         }
                         break;
 
                     case "main menu":
                         {
+                            screenSave.Remove(text);
                             MainMenu(MethodBase.GetCurrentMethod());
                         }
                         break;
@@ -314,10 +371,24 @@ namespace HauntedHouse
             bool leave = false;
             bool left = false;
 
-            Console.WriteLine("You are in another room. Another door is to the left, the door you came through was to the right");
+            text = "You are in another room. Another door is to the left, the door you came through was to the right";
+            if (screenSave.Count > 0)
+            {
+                if (text != screenSave[screenSave.Count - 1])
+                {
+                    ShowMessage();
+                }
+            }
+            else
+            {
+                ShowMessage();
+            }
+
             do
             {
-                switch (Console.ReadLine().ToLower())
+                text = Console.ReadLine().ToLower();
+                screenSave.Add(text);
+                switch (text)
                 {
                     case "go left":
                         {
@@ -334,6 +405,7 @@ namespace HauntedHouse
 
                     case "main menu":
                         {
+                            screenSave.Remove(text);
                             MainMenu(MethodBase.GetCurrentMethod());
                         }
                         break;
@@ -360,8 +432,5 @@ namespace HauntedHouse
             Console.ReadLine();
             MainMenu(MethodBase.GetCurrentMethod());
         }
-        //Properties
-        public static List<bool> Conditions { get => conditions; set => conditions = value; }
-        public static List<string> ScreenSave { get => screenSave; set => screenSave = value; }
     }
 }
