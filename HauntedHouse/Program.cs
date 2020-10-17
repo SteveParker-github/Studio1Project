@@ -251,7 +251,7 @@ namespace HauntedHouse
         {
             bool leave = false;
            
-            text = "It's a room with a chest. theres a door to the left";
+            text = "It's a room with a chest. There's a door to the left";
             if (screenSave.Count > 0)
             {
                 if (text != screenSave[screenSave.Count - 1])
@@ -371,7 +371,7 @@ namespace HauntedHouse
             bool leave = false;
             bool left = false;
 
-            text = "You are in another room. Another door is to the left, the door you came through was to the right";
+            text = "You are in another room. Another door is to the left, the door you came through is to the right";
             if (screenSave.Count > 0)
             {
                 if (text != screenSave[screenSave.Count - 1])
