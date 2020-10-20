@@ -30,18 +30,24 @@ namespace HauntedHouse
         //Fields
         private static List<List<bool>> roomConditions; //keeps a track of all the work the player has done in a certain room. 
         private static List<int> inventory; //Player's inventory
+        private static List<string> inventoryName; //The names of each item
         private static List<string> screenSave;  //saves what is currently on the screen
         private static string text;              //use this to show a message for the player
-
 
         //Main method
         static void Main(string[] args)
         {
             roomConditions = new List<List<bool>>();
+            inventoryName = new List<string>();
             //Room1
             roomConditions.Add(new List<bool>());
             //Room2
             roomConditions.Add(new List<bool>());
+            inventoryName.Add("Rusty door key");
+            //declare all the inventory here.
+            inventory = new List<int>(); //would need to create a list of all the items we will have in the game.
+            inventory.Add(0); //Room1 key to go to Room2.
+
             screenSave = new List<string>();
             MainMenu(MethodBase.GetCurrentMethod());
         }
@@ -179,6 +185,12 @@ namespace HauntedHouse
                 }
             }
 
+            sw.WriteLine(inventory.Count);
+            foreach (int item in inventory)
+            {
+                sw.WriteLine(item);
+            }
+
             //removes strings if above certain count and saves each line.
             if (screenSave.Count > SCREENSAVECOUNT)
             {
@@ -201,17 +213,18 @@ namespace HauntedHouse
 
             StreamReader sr = new StreamReader(FILELOCATION);
 
-            //clears what ever is in the conditions list or creates it 
+            // clears what ever is in the conditions list or creates it 
                 roomConditions.Clear();
 
             while (!sr.EndOfStream)
             {
                 methodName = sr.ReadLine();
-                int count = Convert.ToInt16(sr.ReadLine());
+
+                int count = Convert.ToInt16(sr.ReadLine()); // counts how many rooms are in the game.
                 for (int i = 0; i < count; i++)
                 {
                     roomConditions.Add(new List<bool>());
-                    int room = Convert.ToInt16(sr.ReadLine());
+                    int room = Convert.ToInt16(sr.ReadLine()); // counts how many conditions are in the room.
                     for (int j = 0; j < room; j++)
                     {
                         if (room > 0)
@@ -220,8 +233,16 @@ namespace HauntedHouse
                         }
                     }
                 }
-                
-                count = Convert.ToInt16(sr.ReadLine());
+
+                inventory.Clear();
+
+                int items = Convert.ToInt16(sr.ReadLine()); // count how many items are in the game.
+                for (int i = 0; i < items; i++)
+                {
+                    inventory.Add(Convert.ToInt16(sr.ReadLine()));
+                }
+
+                count = Convert.ToInt16(sr.ReadLine()); // count how many lines to load
                 for (int i = 0; i < count; i++)
                 {
                     screenSave.Add(sr.ReadLine());
@@ -258,6 +279,28 @@ namespace HauntedHouse
         {
             Console.WriteLine(text);
             screenSave.Add(text);
+        }
+
+        //tells the player what they have on them
+        public static void CheckInventory()
+        {
+            int count = 0;
+            text = "You are carrying:";
+            ShowMessage();
+            for (int i = 0; i < inventory.Count; i++)
+            {
+                if (inventory[i] > 0)
+                {
+                    text = inventoryName[i];
+                    ShowMessage();
+                    count++;
+                }
+            }
+            if (count == 0)
+            {
+                text = "Nothing";
+                ShowMessage();
+            }
         }
         //First room of the game
         static public void Room1()
@@ -318,7 +361,7 @@ namespace HauntedHouse
                                 text = "you take the key";
                                 ShowMessage();
                                 pickedKey = true;
-                                //put key in inventory 
+                                inventory[0] = 1;
                             }
                             else
                             {
@@ -333,7 +376,7 @@ namespace HauntedHouse
 
                     case "use key on door":
                         {
-                            if ((pickedKey) && (doorLocked)) //change pickedkey to key in inventory
+                            if ((inventory[0] == 1) && (doorLocked)) //changed pickedkey to key in inventory
                             {
                                 text = "You unlock the door";
                                 ShowMessage();
@@ -341,7 +384,7 @@ namespace HauntedHouse
                             }
                             else
                             {
-                                if (!pickedKey)
+                                if (inventory[0] == 0)
                                 {
                                     text = "what key? you don't have a key";
                                     ShowMessage();
@@ -382,6 +425,12 @@ namespace HauntedHouse
                         {
                             screenSave.Remove(text);
                             MainMenu(MethodBase.GetCurrentMethod());
+                        }
+                        break;
+
+                    case "inventory":
+                        {
+                            CheckInventory();
                         }
                         break;
                 }
