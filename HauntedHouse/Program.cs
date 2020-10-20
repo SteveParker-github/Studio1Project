@@ -484,6 +484,12 @@ namespace HauntedHouse
                             MainMenu(MethodBase.GetCurrentMethod());
                         }
                         break;
+
+                    case "inventory":
+                        {
+                            CheckInventory();
+                        }
+                        break;
                 }
 
             } while (!leave);
