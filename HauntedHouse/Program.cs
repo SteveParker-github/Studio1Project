@@ -28,7 +28,8 @@ namespace HauntedHouse
         private const int SCREENSAVECOUNT = 20;
 
         //Fields
-        private static List<bool> conditions;    //keeps a track of all the work the player has done. //maybe have a list of list of bool       
+        private static List<List<bool>> roomConditions; //keeps a track of all the work the player has done in a certain room. 
+        private static List<int> inventory; //Player's inventory
         private static List<string> screenSave;  //saves what is currently on the screen
         private static string text;              //use this to show a message for the player
 
@@ -36,7 +37,11 @@ namespace HauntedHouse
         //Main method
         static void Main(string[] args)
         {
-            conditions = new List<bool>();
+            roomConditions = new List<List<bool>>();
+            //Room1
+            roomConditions.Add(new List<bool>());
+            //Room2
+            roomConditions.Add(new List<bool>());
             screenSave = new List<string>();
             MainMenu(MethodBase.GetCurrentMethod());
         }
@@ -158,15 +163,20 @@ namespace HauntedHouse
             //What needs to be saved?
             //method location, list of conditions, items, screensave text.
             StreamWriter sw = new StreamWriter(FILELOCATION);
+
             string methodName = method.Replace("Void", "");
             methodName = methodName.Replace("()", "");
             methodName = methodName.Replace(" ", "");
             sw.WriteLine(methodName);
 
-            sw.WriteLine(conditions.Count);
-            foreach (bool item in conditions)
+            sw.WriteLine(roomConditions.Count);
+            foreach (List<bool> room in roomConditions)
             {
+                sw.WriteLine(room.Count);
+                foreach (bool item in room)
+                {
                 sw.WriteLine(item);
+                }
             }
 
             //removes strings if above certain count and saves each line.
@@ -192,10 +202,7 @@ namespace HauntedHouse
             StreamReader sr = new StreamReader(FILELOCATION);
 
             //clears what ever is in the conditions list or creates it 
-            if (conditions != null)
-            {
-                conditions.Clear();
-            }
+                roomConditions.Clear();
 
             while (!sr.EndOfStream)
             {
@@ -203,7 +210,15 @@ namespace HauntedHouse
                 int count = Convert.ToInt16(sr.ReadLine());
                 for (int i = 0; i < count; i++)
                 {
-                    conditions.Add(Convert.ToBoolean(sr.ReadLine()));
+                    roomConditions.Add(new List<bool>());
+                    int room = Convert.ToInt16(sr.ReadLine());
+                    for (int j = 0; j < room; j++)
+                    {
+                        if (room > 0)
+                        {
+                            roomConditions[i].Add(Convert.ToBoolean(sr.ReadLine()));
+                        }
+                    }
                 }
                 
                 count = Convert.ToInt16(sr.ReadLine());
@@ -227,17 +242,15 @@ namespace HauntedHouse
         static public void NewGame()
         {
             Console.Clear();
-            LoadConditions();
+            LoadRooms();
             Room1();
         }
 
         //Load all the conditions for the game
-        public static void LoadConditions()
+        public static void LoadRooms()
         {
-            conditions = new List<bool>();
-            conditions.Add(false); //chestopen
-            conditions.Add(false); //picked up key
-            conditions.Add(true); //door is locked
+            //roomConditions = new List<List>();
+            //roomConditions.Add(conditions = new List<bool>());
         }
 
         //shows the player the message and saves it
@@ -249,6 +262,18 @@ namespace HauntedHouse
         //First room of the game
         static public void Room1()
         {
+            var room = roomConditions[0]; //makes it easier to write than roomConditions[0]...
+            if (room.Count == 0)
+            {
+                room.Add(false);
+                room.Add(false);
+                room.Add(true);
+            }
+            //Thought it was nicer to show what it does rather than numbers
+            var chestOpen = room[0];
+            var pickedKey = room[1];
+            var doorLocked = room[2];
+
             bool leave = false;
            
             text = "It's a room with a chest. There's a door to the left";
@@ -272,7 +297,7 @@ namespace HauntedHouse
                 {
                     case "open chest":
                         {
-                            if (conditions[0])
+                            if (chestOpen)
                             {
                                 text = "The chest is already open.";
                                 ShowMessage();
@@ -281,22 +306,23 @@ namespace HauntedHouse
                             {
                                 text = "You open the chest. There is a key inside";
                                 ShowMessage();
-                                conditions[0] = true;
+                                chestOpen = true;
                             }
                         }
                         break;
 
                     case "take key":
                         {
-                            if ((!conditions[1])&&(conditions[0]))
+                            if ((!pickedKey)&&(chestOpen))
                             {
                                 text = "you take the key";
                                 ShowMessage();
-                                conditions[1] = true;
+                                pickedKey = true;
+                                //put key in inventory 
                             }
                             else
                             {
-                                if (conditions[1])
+                                if (pickedKey)
                                 {
                                     text = "You have already picked up the key.";
                                     ShowMessage();
@@ -307,15 +333,15 @@ namespace HauntedHouse
 
                     case "use key on door":
                         {
-                            if ((conditions[1]) && (conditions[2]))
+                            if ((pickedKey) && (doorLocked)) //change pickedkey to key in inventory
                             {
                                 text = "You unlock the door";
                                 ShowMessage();
-                                conditions[2] = false;
+                                doorLocked = false;
                             }
                             else
                             {
-                                if (conditions[2])
+                                if (!pickedKey)
                                 {
                                     text = "what key? you don't have a key";
                                     ShowMessage();
@@ -331,7 +357,7 @@ namespace HauntedHouse
                                     {
                                         text = "You locked the door... for some reason.";
                                         ShowMessage();
-                                        conditions[2] = true;
+                                        doorLocked = true;
                                     }
                                 }
                             }
@@ -340,7 +366,7 @@ namespace HauntedHouse
 
                     case "go left":
                         {
-                            if (!conditions[2])
+                            if (!doorLocked)
                             {
                                 leave = true;
                             }
