@@ -1,7 +1,7 @@
 ﻿/* Program name:            Haunted House (Work in title)
  * Project file name:       HauntedHouse
  * Author:                  Steve Parker, 
- * Date:                    17/10/2020
+ * Date:                    20/10/2020
  * Language:                C#
  * Platform:                Microsoft Visual Studio 2019
  * Purpose:                 To work in a team environment by making a text based adventure game.
@@ -38,9 +38,9 @@ namespace HauntedHouse
         static void Main(string[] args)
         {
             screenSave = new List<string>();
-            inventory = new List<Tuple<string, int>>(); 
-            objects = new List<Tuple<string, bool, string, string>>(); 
-            roomDirection = new List<Tuple<string, bool, string, string>>();
+            inventory = new List<Tuple<string, int>>(); //name of item, how many they have on them.
+            objects = new List<Tuple<string, bool, string, string>>(); //name of the location and object, have they used the object, if they activate, if they try to activate again.
+            roomDirection = new List<Tuple<string, bool, string, string>>(); //name of direction, can the player go that way, the name of the location, reason why they can't go.
             gameStart = true;
             playerLocation = "MainMenu";
 
@@ -153,10 +153,6 @@ namespace HauntedHouse
                                         Console.WriteLine(objectResult.Item3);
                                         objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4));
                                         objects.Remove(objectResult);
-                                        if (objectResult.Item1 == "Room1chest")
-                                        {
-                                            objects.Add(Tuple.Create("Room1key", false, "You take the key", "You already have the key"));
-                                        }
                                     }
                                     else
                                     {
@@ -194,12 +190,6 @@ namespace HauntedHouse
                                                     Console.WriteLine(objectResult.Item3);
                                                     objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4));
                                                     objects.Remove(objectResult);
-                                                    if (objectResult.Item1 == "Room1door")
-                                                    {
-                                                        var direction = roomDirection.Find(x => x.Item1 == "Room1west");
-                                                        roomDirection.Add(Tuple.Create(direction.Item1, true, direction.Item3, direction.Item4));
-                                                        roomDirection.Remove(direction);
-                                                    }
                                                 }
                                                 else
                                                 {
@@ -344,20 +334,37 @@ namespace HauntedHouse
         //First room of the game
         static public void Room1()
         {
+            //if chest doesn't exist, create it
             if (!objects.Any(c => c.Item1.Contains("Room1chest")))
             {
                 objects.Add(Tuple.Create("Room1chest", false, "You opened the chest. There is a key inside", "the chest is already open"));
             }
+            //if door doesn't exist, create it
             if (!objects.Any(c => c.Item1.Contains("Room1door")))
             {
                 objects.Add(Tuple.Create("Room1door", false, "you open the door", "You locked the door again"));
             }
-            if (!roomDirection.Any(c => c.Item1.Contains("Room1west")))
+            //if chest is opened and key doesn't exist, create it
+            var objectResult = objects.Find(x => x.Item1 == "Room1chest");
+            if (objectResult.Item2 && (!objects.Any(c => c.Item1.Contains("Room1key"))))
+            {
+                objects.Add(Tuple.Create("Room1key", false, "You take the key", "You already have the key"));
+            }
+            //if direction in room1 equals 0, create all the directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room1")) == 0)
             {
                 roomDirection.Add(Tuple.Create("Room1north", false, "", ""));
                 roomDirection.Add(Tuple.Create("Room1south", false, "", ""));
                 roomDirection.Add(Tuple.Create("Room1east", false, "", ""));
                 roomDirection.Add(Tuple.Create("Room1west", false, "Room2", "The door is locked, maybe there's a key somewhere in this room *shrugs*"));
+            }
+            //if door is open create direction west with true, and delete original
+            objectResult = objects.Find(x => x.Item1 == "Room1door");
+            if (objectResult.Item2)
+            {
+                var direction = roomDirection.Find(x => x.Item1 == "Room1west");
+                roomDirection.Add(Tuple.Create(direction.Item1, true, direction.Item3, direction.Item4));
+                roomDirection.Remove(direction);
             }
 
             text = "It's a room with a chest. West of you is a door";
@@ -405,7 +412,6 @@ namespace HauntedHouse
             Console.Clear();
             Console.WriteLine("That is the end for now.");
             Console.WriteLine("Press any key to go back to main menu...");
-            //Console.ReadLine();
             playerLocation = "MainMenu";
         }
     }
