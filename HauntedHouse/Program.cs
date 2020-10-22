@@ -30,6 +30,7 @@ namespace HauntedHouse
         private static List<Tuple<string, int>> inventory; //Player's inventory
         private static List<Tuple<string, bool, string, string>> roomDirection; //direction which is allowed in each room
         private static List<string> screenSave;  //saves what is currently on the screen
+        private static List<bool> roomDescription; //checks whether to describe the room or not
         private static string text;              //use this to show a message for the player
         private static bool gameStart;           //checks to see if the game has started or not
         private static bool menu;                //checks to see if the game is in the menu
@@ -42,6 +43,7 @@ namespace HauntedHouse
             inventory = new List<Tuple<string, int>>(); //name of item, how many they have on them.
             objects = new List<Tuple<string, bool, string, string, string, string>>(); //name of the location and object, have they used the object, if they activate, if they try to activate again.
             roomDirection = new List<Tuple<string, bool, string, string>>(); //name of direction, can the player go that way, the name of the location, reason why they can't go.
+            roomDescription = new List<bool>();
             gameStart = true;
             playerLocation = "MainMenu";
             menu = true;
@@ -166,13 +168,74 @@ namespace HauntedHouse
         //To give the player any help with commands
         static public void Help(string[] playerTexts)
         {
-            Console.WriteLine("Instructions to play the game");
+            if ((playerTexts.Length > 1) && (playerTexts[1] != ""))
+            {
+                switch (playerTexts[1])
+                {
+                    case "look":
+                        {
+                            Console.WriteLine("Use to look at certain objects. For exmaple 'look chest'.");
+                        }
+                        break;
+
+                    case "use":
+                        {
+                            Console.WriteLine("Use an item in your inventory with an object around the room. For example 'use key on door'.");
+                        }
+                        break;
+
+                    case "go":
+                        {
+                            Console.WriteLine("Use to go in a direction. For example 'go west'");
+                        }
+                        break;
+
+                    case "open":
+                        {
+                            Console.WriteLine("Use to open something. For example 'open chest'");
+                        }
+                        break;
+
+                    case "take":
+                        {
+                            Console.WriteLine("Use to take an item. for exmaple 'take key'");
+                        }
+                        break;
+
+                    default:
+                        {
+                            Console.WriteLine("No information about '" + playerTexts[1] + "'.");
+                        }
+                        break;
+
+                }
+            }
+            else
+            {
+                Console.WriteLine("Current commands you can use: look, go, use, take, open, help, main, save, load, exit.");
+                Console.WriteLine("Type 'help [command]' for more information");
+            }
         }
 
         //Let the player look at something
         static public void Look(string[] playerTexts)
         {
-
+            if ((playerTexts.Length > 1) && (playerTexts[1] != ""))
+            {
+                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
+                {
+                    var objectResult = objects.Find(x => x.Item1 == playerLocation + playerTexts[1]);
+                    Console.WriteLine(objectResult.Item6);
+                }
+                else
+                {
+                    Console.WriteLine("I didn't understand after " + playerTexts[0]);
+                }
+            }
+            else
+            {
+                roomDescription[Convert.ToInt16(playerLocation.Replace("Room", "")) - 1] = true;
+            }
         }
 
         //to move the player to where they want to go (only via compass directions, not holiday resorts)
@@ -395,6 +458,7 @@ namespace HauntedHouse
             playerLocation = "Room1"; //players starting location
             gameStart = false; //tells the game the player is now playing the game.
             menu = false; //lets the game your not in the menu screen
+            roomDescription.Add(true);
             Console.Clear();
         }
 
@@ -469,20 +533,12 @@ namespace HauntedHouse
                 roomDirection.Remove(direction); //removing the old tuple
             }
 
-            text = "It's a room with a chest. West of you is a door"; //description of the room
-            //stops the game repeating the same description if previously saved. Might replace with a new idea..
-            //IDEA: the description of the room is only displayed once when they enter the room for the first time, after that
-            //it will never show unless they type "look".
-            if (screenSave.Count > 0)
+            //description of the room
+            if (roomDescription[0])
             {
-                if (text != screenSave[screenSave.Count - 1])
-                {
-                    ShowMessage();
-                }
-            }
-            else
-            {
+                text = "It's a room with a chest. West of you is a door";
                 ShowMessage();
+                roomDescription[0] = false;
             }
         }
 
