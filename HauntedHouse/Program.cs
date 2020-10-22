@@ -23,7 +23,7 @@ namespace HauntedHouse
     {
         //Constants
         private const string FILELOCATION = @"save.txt";
-        private const int SCREENSAVECOUNT = 20;
+        private const int SCREENSAVECOUNT = 40;
 
         //Fields
         private static List<Tuple<string, bool, string, string, string, string>> objects; //keeps a track of all the work the player has done in a certain room. 
@@ -57,6 +57,7 @@ namespace HauntedHouse
 
                 //the player enters their commands here
                 string selection = Console.ReadLine().ToLower();
+                screenSave.Add(selection);
                 //splits the string into each word
                 string[] playerTexts = selection.Split(" ");
                 //finds what the first word does
@@ -73,10 +74,7 @@ namespace HauntedHouse
 
                     case "save": //to save game
                         {
-                            if (!gameStart)
-                            {
-                                //SaveGame();
-                            }
+                                SaveGame();
                         }
                         break;
 
@@ -84,7 +82,7 @@ namespace HauntedHouse
                         {
                             if (File.Exists(FILELOCATION))
                             {
-                                //LoadGame();
+                                LoadGame();
                             }
                         }
                         break;
@@ -114,7 +112,8 @@ namespace HauntedHouse
                             }
                             else if (!menu)
                             {
-                                Console.WriteLine("Can't use that command here");
+                                text = "Can't use that command here";
+                                ShowMessage();
                             }
                         }
                         break;
@@ -157,14 +156,133 @@ namespace HauntedHouse
 
                     default: //if nothing else
                         {
-                            Console.WriteLine("I didn't understand that");
+                            text = "I didn't understand that";
+                            ShowMessage();
                         }
                         break;
                 }
             }
             while (exit == false); //only quit the loop if they quit
         }
+        //Saves the game
+        static public void SaveGame()
+        {
+            StreamWriter sw = new StreamWriter(FILELOCATION);
 
+            sw.WriteLine(playerLocation); //saves player's location
+
+            sw.WriteLine(inventory.Count);
+            foreach (var item in inventory)
+            {
+                sw.WriteLine(item.Item1);
+                sw.WriteLine(item.Item2.ToString());
+            }
+
+            sw.WriteLine(objects.Count);
+            foreach (var item in objects)
+            {
+                sw.WriteLine(item.Item1);
+                sw.WriteLine(item.Item2.ToString());
+                sw.WriteLine(item.Item3);
+                sw.WriteLine(item.Item4);
+                sw.WriteLine(item.Item5);
+                sw.WriteLine(item.Item6);
+            }
+
+            sw.WriteLine(roomDirection.Count);
+            foreach (var item in roomDirection)
+            {
+                sw.WriteLine(item.Item1);
+                sw.WriteLine(item.Item2.ToString());
+                sw.WriteLine(item.Item3);
+                sw.WriteLine(item.Item4);
+            }
+
+            sw.WriteLine(roomDescription.Count);
+            foreach (var item in roomDescription)
+            {
+                sw.WriteLine(item.ToString());
+            }
+
+            //removes strings if above certain count and saves each line.
+            if (screenSave.Count > SCREENSAVECOUNT)
+            {
+                screenSave.RemoveRange(0, screenSave.Count - SCREENSAVECOUNT);
+            }
+
+            sw.WriteLine(screenSave.Count);
+            foreach (string item in screenSave)
+            {
+                sw.WriteLine(item);
+            }
+
+            sw.Close();
+
+            Console.WriteLine("Game is saved!");
+        }
+
+        //Load the game 
+        static public void LoadGame()
+        {
+            //clear the list before loading
+            inventory.Clear();
+            objects.Clear();
+            roomDirection.Clear();
+            roomDescription.Clear();
+            screenSave.Clear();
+
+            StreamReader sr = new StreamReader(FILELOCATION);
+
+            while (!sr.EndOfStream)
+            {
+                playerLocation = sr.ReadLine(); //load players location
+
+                int count = Convert.ToInt16(sr.ReadLine()); //load how many lines for the list
+                for (int i = 0; i < count; i++)
+                {
+                    inventory.Add(Tuple.Create(sr.ReadLine(), Convert.ToInt32(sr.ReadLine())));
+                }
+
+                count = Convert.ToInt16(sr.ReadLine());
+                for (int i = 0; i < count; i++)
+                {
+                    objects.Add(Tuple.Create(sr.ReadLine(),
+                                             Convert.ToBoolean(sr.ReadLine()),
+                                             sr.ReadLine(),
+                                             sr.ReadLine(),
+                                             sr.ReadLine(),
+                                             sr.ReadLine()));
+                }
+
+                count = Convert.ToInt16(sr.ReadLine());
+                for (int i = 0; i < count; i++)
+                {
+                    roomDirection.Add(Tuple.Create(sr.ReadLine(),
+                                                   Convert.ToBoolean(sr.ReadLine()),
+                                                   sr.ReadLine(),
+                                                   sr.ReadLine()));
+                }
+
+                count = Convert.ToInt16(sr.ReadLine());
+                for (int i = 0; i < count; i++)
+                {
+                    roomDescription.Add(Convert.ToBoolean(sr.ReadLine()));
+                }
+
+                count = Convert.ToInt16(sr.ReadLine());
+                for (int i = 0; i < count; i++)
+                {
+                    screenSave.Add(sr.ReadLine());
+                }
+            }
+            sr.Close();
+            Console.Clear();
+            foreach (string line in screenSave)
+            {
+                Console.WriteLine(line);
+            }
+            Console.WriteLine("Game Loaded");
+        }
         //To give the player any help with commands
         static public void Help(string[] playerTexts)
         {
@@ -225,11 +343,13 @@ namespace HauntedHouse
                 if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
                 {
                     var objectResult = objects.Find(x => x.Item1 == playerLocation + playerTexts[1]);
-                    Console.WriteLine(objectResult.Item6);
+                    text = objectResult.Item6;
+                    ShowMessage();
                 }
                 else
                 {
-                    Console.WriteLine("I didn't understand after " + playerTexts[0]);
+                    text = "I didn't understand after " + playerTexts[0];
+                    ShowMessage();
                 }
             }
             else
@@ -254,18 +374,21 @@ namespace HauntedHouse
                         }
                         else
                         {
-                            Console.WriteLine(direction.Item4);
+                            text = direction.Item4;
+                            ShowMessage();
                         }
                     }
                     else
                     {
-                        Console.WriteLine("You can not go that direction.");
+                        text = "You can not go that direction.";
+                        ShowMessage();
                     }
                 }
             }
             else
             {
-                Console.WriteLine("Go where?");
+                text = "Go where?";
+                ShowMessage();
             }
         }
 
@@ -288,39 +411,46 @@ namespace HauntedHouse
                                 {
                                     if (!objectResult.Item2)
                                     {
-                                        Console.WriteLine(objectResult.Item3);
+                                        text = objectResult.Item3;
+                                        ShowMessage();
                                         objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                                         objects.Remove(objectResult);
                                     }
                                     else
                                     {
-                                        Console.WriteLine(objectResult.Item4);
+                                        text = objectResult.Item4;
+                                        ShowMessage();
                                     }
                                 }
                                 else
                                 {
-                                    Console.WriteLine("It wasn't intended to be used like that.");
+                                    text = "It wasn't intended to be used like that.";
+                                    ShowMessage();
                                 }
                             }
                             else
                             {
-                                Console.WriteLine("I didn't understand after " + playerTexts[0] + " " + playerTexts[1]);
+                                text = "I didn't understand after " + playerTexts[0] + " " + playerTexts[1];
+                                ShowMessage();
                             }
                         }
                         else
                         {
-                            Console.WriteLine("use " + itemResult.Item1 + " on what?");
+                            text = "use " + itemResult.Item1 + " on what?";
+                            ShowMessage();
                         }
                     }
                     else
                     {
-                        Console.WriteLine("You do not have that item");
+                        text = "You do not have that item";
+                        ShowMessage();
                     }
                 }
             }
             else
             {
-                Console.WriteLine("Use what?");
+                text = "Use what?";
+                ShowMessage();
             }
         }
 
@@ -336,28 +466,33 @@ namespace HauntedHouse
                     {
                         if (!objectResult.Item2)
                         {
-                            Console.WriteLine(objectResult.Item3);
+                            text = objectResult.Item3;
+                            ShowMessage();
                             objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                             objects.Remove(objectResult);
                         }
                         else
                         {
-                            Console.WriteLine(objectResult.Item4);
+                            text = objectResult.Item4;
+                            ShowMessage();
                         }
                     }
                     else
                     {
-                        Console.WriteLine("You can't open that");
+                        text = "You can't open that";
+                        ShowMessage();
                     }
                 }
                 else
                 {
-                    Console.WriteLine("I didn't understand after " + playerTexts[0]);
+                    text = "I didn't understand after " + playerTexts[0];
+                    ShowMessage();
                 }
             }
             else
             {
-                Console.WriteLine("Open what?");
+                text = "Open what?";
+                ShowMessage();
             }
         }
 
@@ -373,7 +508,8 @@ namespace HauntedHouse
                     {
                         if (!objectResult.Item2)
                         {
-                            Console.WriteLine(objectResult.Item3);
+                            text = objectResult.Item3;
+                            ShowMessage();
                             objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                             objects.Remove(objectResult);
                             var itemResult = inventory.Find(x => x.Item1 == (playerTexts[1]));
@@ -382,22 +518,26 @@ namespace HauntedHouse
                         }
                         else
                         {
-                            Console.WriteLine(objectResult.Item4);
+                            text = objectResult.Item4;
+                            ShowMessage();
                         }
                     }
                     else
                     {
-                        Console.WriteLine("You can't take that");
+                        text = "You can't take that";
+                        ShowMessage();
                     }
                 }
                 else
                 {
-                    Console.WriteLine("I didn't understand after " + playerTexts[0]);
+                    text = "I didn't understand after " + playerTexts[0];
+                    ShowMessage();
                 }
             }
             else
             {
-                Console.WriteLine("Take what?");
+                text = "Take what?";
+                ShowMessage();
             }
         }
         static public void MainMenu()
