@@ -27,7 +27,7 @@ namespace HauntedHouse
 
         //Fields
         private static List<Tuple<string, bool, string, string, string, string>> objects; //keeps a track of all the work the player has done in a certain room. 
-        private static List<Tuple<string, int>> inventory; //Player's inventory
+        private static List<Tuple<string, int, string>> inventory; //Player's inventory
         private static List<Tuple<string, bool, string, string>> roomDirection; //direction which is allowed in each room
         private static List<string> screenSave;  //saves what is currently on the screen
         private static List<bool> roomDescription; //checks whether to describe the room or not
@@ -40,7 +40,7 @@ namespace HauntedHouse
         static void Main(string[] args)
         {
             screenSave = new List<string>();
-            inventory = new List<Tuple<string, int>>(); //name of item, how many they have on them.
+            inventory = new List<Tuple<string, int, string>>(); //name of item, how many they have on them.
             objects = new List<Tuple<string, bool, string, string, string, string>>(); //name of the location and object, have they used the object, if they activate, if they try to activate again.
             roomDirection = new List<Tuple<string, bool, string, string>>(); //name of direction, can the player go that way, the name of the location, reason why they can't go.
             roomDescription = new List<bool>();
@@ -147,6 +147,27 @@ namespace HauntedHouse
                             Take(playerTexts);
                         }
                         break;
+                    case "inventory":
+                    case "i":
+                        {
+                            foreach (var item in inventory)
+                            {
+                                int counter = 0;
+                                if (item.Item2 > 0)
+                                {
+                                    text = item.Item1 + " " + item.Item3;
+                                    ShowMessage();
+                                    counter++;
+                                }
+                                if (counter == 0)
+                                {
+                                    text = "You are carrying nothing... i mean nothing at all, not even lint or a loose string.";
+                                    ShowMessage();
+                                }
+
+                            }
+                        }
+                        break;
 
                     case "help": //help command
                         {
@@ -176,6 +197,7 @@ namespace HauntedHouse
             {
                 sw.WriteLine(item.Item1);
                 sw.WriteLine(item.Item2.ToString());
+                sw.WriteLine(item.Item3);
             }
 
             sw.WriteLine(objects.Count);
@@ -240,7 +262,9 @@ namespace HauntedHouse
                 int count = Convert.ToInt16(sr.ReadLine()); //load how many lines for the list
                 for (int i = 0; i < count; i++)
                 {
-                    inventory.Add(Tuple.Create(sr.ReadLine(), Convert.ToInt32(sr.ReadLine())));
+                    inventory.Add(Tuple.Create(sr.ReadLine(), 
+                                               Convert.ToInt32(sr.ReadLine()),
+                                               sr.ReadLine()));
                 }
 
                 count = Convert.ToInt16(sr.ReadLine());
@@ -513,7 +537,7 @@ namespace HauntedHouse
                             objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                             objects.Remove(objectResult);
                             var itemResult = inventory.Find(x => x.Item1 == (playerTexts[1]));
-                            inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1));
+                            inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1, itemResult.Item3));
                             inventory.Remove(itemResult);
                         }
                         else
@@ -594,7 +618,7 @@ namespace HauntedHouse
         {
 
             //declare all the inventory here.
-            inventory.Add(new Tuple<string, int>("key", 0)); //Room1 key to unlock the door in Room1.
+            inventory.Add(Tuple.Create("key", 0, "It's a shiny key.... only joking, its rusted beyond believe but still works.")); //Room1 key to unlock the door in Room1.
             playerLocation = "Room1"; //players starting location
             gameStart = false; //tells the game the player is now playing the game.
             menu = false; //lets the game your not in the menu screen
