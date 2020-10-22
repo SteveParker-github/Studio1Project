@@ -26,7 +26,7 @@ namespace HauntedHouse
         private const int SCREENSAVECOUNT = 20;
 
         //Fields
-        private static List<Tuple<string, bool, string, string>> objects; //keeps a track of all the work the player has done in a certain room. 
+        private static List<Tuple<string, bool, string, string, string, string>> objects; //keeps a track of all the work the player has done in a certain room. 
         private static List<Tuple<string, int>> inventory; //Player's inventory
         private static List<Tuple<string, bool, string, string>> roomDirection; //direction which is allowed in each room
         private static List<string> screenSave;  //saves what is currently on the screen
@@ -39,7 +39,7 @@ namespace HauntedHouse
         {
             screenSave = new List<string>();
             inventory = new List<Tuple<string, int>>(); //name of item, how many they have on them.
-            objects = new List<Tuple<string, bool, string, string>>(); //name of the location and object, have they used the object, if they activate, if they try to activate again.
+            objects = new List<Tuple<string, bool, string, string, string, string>>(); //name of the location and object, have they used the object, if they activate, if they try to activate again.
             roomDirection = new List<Tuple<string, bool, string, string>>(); //name of direction, can the player go that way, the name of the location, reason why they can't go.
             gameStart = true;
             playerLocation = "MainMenu";
@@ -148,15 +148,22 @@ namespace HauntedHouse
                                 if (objects.Any(c => c.Item1.Contains(playerLocation + playertexts[1])))
                                 {
                                     var objectResult = objects.Find(x => x.Item1 == (playerLocation + playertexts[1]));
-                                    if (!objectResult.Item2)
+                                    if (objectResult.Item5 == "open")
                                     {
-                                        Console.WriteLine(objectResult.Item3);
-                                        objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4));
-                                        objects.Remove(objectResult);
+                                        if (!objectResult.Item2)
+                                        {
+                                            Console.WriteLine(objectResult.Item3);
+                                            objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
+                                            objects.Remove(objectResult);
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine(objectResult.Item4);
+                                        }
                                     }
                                     else
                                     {
-                                        Console.WriteLine(objectResult.Item4);
+                                        Console.WriteLine("You can't open that");
                                     }
                                 }
                                 else
@@ -188,7 +195,7 @@ namespace HauntedHouse
                                                 if (!objectResult.Item2)
                                                 {
                                                     Console.WriteLine(objectResult.Item3);
-                                                    objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4));
+                                                    objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                                                     objects.Remove(objectResult);
                                                 }
                                                 else
@@ -232,19 +239,26 @@ namespace HauntedHouse
                                 if (objects.Any(c => c.Item1.Contains(playerLocation + playertexts[1])))
                                 {
                                     var objectResult = objects.Find(x => x.Item1 == (playerLocation + playertexts[1]));
-                                    if (!objectResult.Item2)
+                                    if (objectResult.Item5 == "take")
                                     {
-                                        Console.WriteLine(objectResult.Item3);
-                                        objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4));
-                                        objects.Remove(objectResult);
-                                        var itemResult = inventory.Find(x => x.Item1 == (playertexts[1]));
-                                        inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1));
-                                        inventory.Remove(itemResult);
+                                        if (!objectResult.Item2)
+                                        {
+                                            Console.WriteLine(objectResult.Item3);
+                                            objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
+                                            objects.Remove(objectResult);
+                                            var itemResult = inventory.Find(x => x.Item1 == (playertexts[1]));
+                                            inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1));
+                                            inventory.Remove(itemResult);
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine(objectResult.Item4);
+                                        }
                                     }
                                     else
                                     {
-                                        Console.WriteLine(objectResult.Item4);
-                                    }
+                                        Console.WriteLine("You can't take that");
+                                    }                                      
                                 }
                                 else
                                 {
@@ -331,24 +345,24 @@ namespace HauntedHouse
             screenSave.Add(text);
         }
 
-        //First room of the game
+        //First room of the game, Use this as the template
         static public void Room1()
         {
             //if chest doesn't exist, create it
             if (!objects.Any(c => c.Item1.Contains("Room1chest")))
             {
-                objects.Add(Tuple.Create("Room1chest", false, "You opened the chest. There is a key inside", "the chest is already open"));
+                objects.Add(Tuple.Create("Room1chest", false, "You opened the chest. There is a key inside", "the chest is already open", "open", "describe the chest"));
             }
             //if door doesn't exist, create it
             if (!objects.Any(c => c.Item1.Contains("Room1door")))
             {
-                objects.Add(Tuple.Create("Room1door", false, "you open the door", "You locked the door again"));
+                objects.Add(Tuple.Create("Room1door", false, "you open the door", "You locked the door again", "", "describe the door"));
             }
             //if chest is opened and key doesn't exist, create it
             var objectResult = objects.Find(x => x.Item1 == "Room1chest");
             if (objectResult.Item2 && (!objects.Any(c => c.Item1.Contains("Room1key"))))
             {
-                objects.Add(Tuple.Create("Room1key", false, "You take the key", "You already have the key"));
+                objects.Add(Tuple.Create("Room1key", false, "You take the key", "You already have the key", "take", "describe the key"));
             }
             //if direction in room1 equals 0, create all the directions
             if (roomDirection.Count(c => c.Item1.Contains("Room1")) == 0)
