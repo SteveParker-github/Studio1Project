@@ -16,14 +16,28 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace HauntedHouse
 {
     class Program
     {
+        //this is to make the program auto full size from:
+        //https://www.c-sharpcorner.com/code/448/code-to-auto-maximize-console-application-according-to-screen-width-in-c-sharp.aspx
+        [DllImport("kernel32.dll", ExactSpelling = true)]
+        private static extern IntPtr GetConsoleWindow();
+        private static IntPtr ThisConsole = GetConsoleWindow();
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        private const int HIDE = 0;
+        private const int MAXIMIZE = 3;
+        private const int MINIMIZE = 6;
+        private const int RESTORE = 9;
+
+
         //Constants
         private const string FILELOCATION = @"save.txt";
-        private const int SCREENSAVECOUNT = 40;
+        private const int SCREENSAVECOUNT = 23;
 
         //Fields
         private static List<Tuple<string, bool, string, string, string, string>> objects; //keeps a track of all the work the player has done in a certain room. 
@@ -32,6 +46,7 @@ namespace HauntedHouse
         private static List<string> screenSave;  //saves what is currently on the screen
         private static List<bool> roomDescription; //checks whether to describe the room or not
         private static string text;              //use this to show a message for the player
+        private static int score;                //keeps a track of the player's score 
         private static bool gameStart;           //checks to see if the game has started or not
         private static bool menu;                //checks to see if the game is in the menu
         private static string playerLocation;            //the location the of the player. 
@@ -39,25 +54,41 @@ namespace HauntedHouse
         //Main method
         static void Main(string[] args)
         {
+            //Set the app to fullScreen
+            Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
+            ShowWindow(ThisConsole, MAXIMIZE);
+
+            //Removes the scroll bar
+            Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
+
             screenSave = new List<string>();
             inventory = new List<Tuple<string, int, string>>(); //name of item, how many they have on them.
             objects = new List<Tuple<string, bool, string, string, string, string>>(); //name of the location and object, have they used the object, if they activate, if they try to activate again.
             roomDirection = new List<Tuple<string, bool, string, string>>(); //name of direction, can the player go that way, the name of the location, reason why they can't go.
             roomDescription = new List<bool>();
             gameStart = true;
+            score = 0;
             playerLocation = "MainMenu";
             menu = true;
             bool exit = false;
             do
             {
-                //these 3 lines to call the method of the location of the player
-                Type type = typeof(Program);
-                MethodBase method = type.GetMethod(playerLocation);
-                method.Invoke(method, null);
-
+                Console.Clear();
+                if (!menu)
+                {
+                    DisplayUI();
+                }
+                else
+                {
+                    MainMenu();
+                }
                 //the player enters their commands here
                 string selection = Console.ReadLine().ToLower();
-                screenSave.Add(selection);
+
+                if (!selection.Contains("new") && !selection.Contains("save") && !selection.Contains("load") && !selection.Contains("main") && !selection.Contains("resume"))
+                {
+                    screenSave.Add("> " + selection);
+                }
                 //splits the string into each word
                 string[] playerTexts = selection.Split(" ");
                 //finds what the first word does
@@ -74,7 +105,7 @@ namespace HauntedHouse
 
                     case "save": //to save game
                         {
-                                SaveGame();
+                            SaveGame();
                         }
                         break;
 
@@ -102,13 +133,9 @@ namespace HauntedHouse
 
                     case "resume": //to resume game (bug test: if the player des this in the game, what happens?)
                         {
-                            if ((!gameStart)&& menu)
+                            if ((!gameStart) && menu)
                             {
-                                Console.Clear();
-                                foreach (var item in screenSave)
-                                {
-                                    Console.WriteLine(item);
-                                }
+                                menu = false;
                             }
                             else if (!menu)
                             {
@@ -185,6 +212,71 @@ namespace HauntedHouse
             }
             while (exit == false); //only quit the loop if they quit
         }
+
+        static public void DisplayUI()
+        {
+            Console.SetCursorPosition(1, 0);
+            Console.Write("Location: " + playerLocation);
+            int quarterWidth = Console.WindowWidth / 4;
+            Console.SetCursorPosition(quarterWidth + quarterWidth / 2, 0);
+            Console.Write("|| Score: " + score.ToString());
+            int width75 = Console.WindowWidth - quarterWidth;
+            Console.SetCursorPosition(width75, 0);
+            Console.Write("||");
+            string temp = "Inventory";
+            int middleInv = (width75 + ((quarterWidth / 2) - (temp.Length) / 2));
+            Console.SetCursorPosition(middleInv, 0);
+            Console.WriteLine(temp);
+            string hr = "";
+            for (int i = 0; i < Console.WindowWidth; i++)
+            {
+                hr = hr + "=";
+            }
+            Console.WriteLine(hr);
+            for (int i = 2; i < Console.WindowHeight - 1; i++)
+            {
+                Console.SetCursorPosition(width75, i);
+                Console.WriteLine("||");
+            }
+            hr = "";
+            for (int i = 0; i < width75; i++)
+            {
+                hr = hr + "=";
+            }
+            Console.SetCursorPosition(0, Console.WindowHeight - 3);
+            Console.WriteLine(hr);
+            foreach (var item in inventory)
+            {
+                int count = 0;
+                if (item.Item2 > 0)
+                {
+                    Console.SetCursorPosition(middleInv, 3 + count);
+                    Console.Write(item.Item1);
+                    count++;
+                }
+                if (count == 0)
+                {
+                    Console.SetCursorPosition(middleInv - 2, 3 + count);
+                    Console.Write("You have nothing");
+                }
+            }
+            Console.SetCursorPosition(0, 0);
+            Console.SetCursorPosition(0, 2);
+            if (screenSave.Count > SCREENSAVECOUNT)
+            {
+                screenSave.RemoveRange(0, screenSave.Count - SCREENSAVECOUNT);
+            }
+            foreach (string line in screenSave)
+            {
+                Console.WriteLine(" " + line);
+            }
+            //these 3 lines to call the method of the location of the player
+            Type type = typeof(Program);
+            MethodBase method = type.GetMethod(playerLocation);
+            method.Invoke(method, null);
+            Console.SetCursorPosition(0, Console.WindowHeight - 2);
+            Console.Write(" > ");
+        }
         //Saves the game
         static public void SaveGame()
         {
@@ -240,7 +332,10 @@ namespace HauntedHouse
 
             sw.Close();
 
-            Console.WriteLine("Game is saved!");
+            //Need to get this cleaner.
+            Console.Clear();
+            Console.WriteLine("Game is saved! Press any key to continue...");
+            Console.ReadLine();
         }
 
         //Load the game 
@@ -262,7 +357,7 @@ namespace HauntedHouse
                 int count = Convert.ToInt16(sr.ReadLine()); //load how many lines for the list
                 for (int i = 0; i < count; i++)
                 {
-                    inventory.Add(Tuple.Create(sr.ReadLine(), 
+                    inventory.Add(Tuple.Create(sr.ReadLine(),
                                                Convert.ToInt32(sr.ReadLine()),
                                                sr.ReadLine()));
                 }
@@ -300,12 +395,8 @@ namespace HauntedHouse
                 }
             }
             sr.Close();
-            Console.Clear();
-            foreach (string line in screenSave)
-            {
-                Console.WriteLine(line);
-            }
-            Console.WriteLine("Game Loaded");
+
+            menu = false;
         }
         //To give the player any help with commands
         static public void Help(string[] playerTexts)
@@ -316,37 +407,43 @@ namespace HauntedHouse
                 {
                     case "look":
                         {
-                            Console.WriteLine("Use to look at certain objects. For exmaple 'look chest'.");
+                            text = "Use to look at certain objects. For exmaple 'look chest'.";
+                            ShowMessage();
                         }
                         break;
 
                     case "use":
                         {
-                            Console.WriteLine("Use an item in your inventory with an object around the room. For example 'use key on door'.");
+                            text = "Use an item in your inventory with an object around the room. For example 'use key on door'.";
+                            ShowMessage();
                         }
                         break;
 
                     case "go":
                         {
-                            Console.WriteLine("Use to go in a direction. For example 'go west'");
+                            text = "Use to go in a direction. For example 'go west'";
+                            ShowMessage();
                         }
                         break;
 
                     case "open":
                         {
-                            Console.WriteLine("Use to open something. For example 'open chest'");
+                            text = "Use to open something. For example 'open chest'";
+                            ShowMessage();
                         }
                         break;
 
                     case "take":
                         {
-                            Console.WriteLine("Use to take an item. for exmaple 'take key'");
+                            text = "Use to take an item. for exmaple 'take key'";
+                            ShowMessage();
                         }
                         break;
 
                     default:
                         {
-                            Console.WriteLine("No information about '" + playerTexts[1] + "'.");
+                            text = "No information about '" + playerTexts[1] + "'.";
+                            ShowMessage();
                         }
                         break;
 
@@ -354,8 +451,10 @@ namespace HauntedHouse
             }
             else
             {
-                Console.WriteLine("Current commands you can use: look, go, use, take, open, help, main, save, load, exit.");
-                Console.WriteLine("Type 'help [command]' for more information");
+                text = "Current commands you can use: look, go, use, take, open, help, main, save, load, exit.";
+                ShowMessage();
+                text = "Type 'help [command]' for more information";
+                ShowMessage();
             }
         }
 
@@ -594,17 +693,17 @@ namespace HauntedHouse
 
             Console.SetCursorPosition(0, 8); //set the cursor 8 lines down
             //Write the welcome line in the center of the console
-            Console.WriteLine(String.Format("{0," + 
-                                           ((Console.WindowWidth / 2) + 
-                                           ("Welcome to Haunted House".Length / 2)) + 
+            Console.WriteLine(String.Format("{0," +
+                                           ((Console.WindowWidth / 2) +
+                                           ("Welcome to Haunted House".Length / 2)) +
                                            "}", "Welcome to Haunted House"));
             Console.SetCursorPosition(0, 10); //move the cursor down 1 line
             //loop the amount of titles on the main page
-            for (int i = 0; i < title.Count; i++) 
+            for (int i = 0; i < title.Count; i++)
             {
-                Console.WriteLine("{0," + 
-                                 ((Console.WindowWidth / 2) + 
-                                 (title[i].Length / 2)) + 
+                Console.WriteLine("{0," +
+                                 ((Console.WindowWidth / 2) +
+                                 (title[i].Length / 2)) +
                                  "}", title[i]);
             }
             //set the cursor 40 characters in, and 20 lines from the top
@@ -629,7 +728,7 @@ namespace HauntedHouse
         //shows the player the message and saves it
         public static void ShowMessage()
         {
-            Console.WriteLine(text);
+            Console.WriteLine(" " + text);
             screenSave.Add(text);
         }
 
@@ -649,11 +748,11 @@ namespace HauntedHouse
             //if door doesn't exist, create it
             if (!objects.Any(c => c.Item1.Contains("Room1door")))
             {
-                objects.Add(Tuple.Create("Room1door", 
-                                         false, 
-                                         "you open the door", 
-                                         "Why would lock yourself in? You only just unlocked it!", 
-                                         "key", 
+                objects.Add(Tuple.Create("Room1door",
+                                         false,
+                                         "you open the door",
+                                         "Why would lock yourself in? You only just unlocked it!",
+                                         "key",
                                          "describe the door"));
             }
 
@@ -661,11 +760,11 @@ namespace HauntedHouse
             //if chest is opened and key doesn't exist, create it
             if (objectResult.Item2 && (!objects.Any(c => c.Item1.Contains("Room1key"))))
             {
-                objects.Add(Tuple.Create("Room1key", 
-                                         false, 
-                                         "You take the key", 
-                                         "You already have the key", 
-                                         "take", 
+                objects.Add(Tuple.Create("Room1key",
+                                         false,
+                                         "You take the key",
+                                         "You already have the key",
+                                         "take",
                                          "describe the key"));
             }
             //if direction in room1 equals 0, create all the directions
@@ -675,17 +774,17 @@ namespace HauntedHouse
                                                false,        //is the player able to go this way   
                                                "",           //the name of the method it will go           
                                                ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
-                roomDirection.Add(Tuple.Create("Room1south", 
-                                               false, 
-                                               "", 
+                roomDirection.Add(Tuple.Create("Room1south",
+                                               false,
+                                               "",
                                                ""));
-                roomDirection.Add(Tuple.Create("Room1east", 
-                                               false, 
-                                               "", 
+                roomDirection.Add(Tuple.Create("Room1east",
+                                               false,
+                                               "",
                                                ""));
-                roomDirection.Add(Tuple.Create("Room1west", 
-                                               false, 
-                                               "Room2", 
+                roomDirection.Add(Tuple.Create("Room1west",
+                                               false,
+                                               "Room2",
                                                "The door is locked, maybe there's a key somewhere in this room *shrugs*"));
             }
             //if door is open create direction west with true, and delete original
@@ -738,6 +837,7 @@ namespace HauntedHouse
             Console.WriteLine("That is the end for now.");
             Console.WriteLine("Press any key to go back to main menu...");
             playerLocation = "MainMenu";
+            menu = true;
         }
     }
 }
