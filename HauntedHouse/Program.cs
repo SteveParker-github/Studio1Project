@@ -877,7 +877,12 @@ namespace HauntedHouse
             //description of the room
             if (roomDescription[0])
             {
-                text = "It's a room with a chest. West of you is a door";
+                text = "You awaken in a dark room you do not recognize. " +
+                        "You are cold and lying on the wooden floorboards in the center of the room. " +
+                        "Through the window moonlight illuminates the few objects in the room. " +
+                        "An old chest lies in the corner under a thick layer of dust. " +
+                        "It is as if the house has not been lived in in many years. " +
+                        "There is a door to the west.";
                 ShowMessage();
                 roomDescription[0] = false;
             }
@@ -894,7 +899,10 @@ namespace HauntedHouse
                 roomDirection.Add(Tuple.Create("Room2west", true, "End", ""));
             }
 
-            text = "You walk into a new room. West from you is a new door. East is where you came from.";
+            text = "You step through the door and find yourself in an old bedroom. Thick dust is everywhere, like the first room, it has been untouched for years. " +
+                "Mold is eating away at the bed spread. The curtains hang in strips letting in a little moonlight. " +
+                "A broken mirror above an old duchess reflects a full moon. " +
+                "You hear strange music coming from the jewelry box upon the duchess. The door you entered from is to the east and another door is to the west. ";
             if (screenSave.Count > 0)
             {
                 if (text != screenSave[screenSave.Count - 1])
