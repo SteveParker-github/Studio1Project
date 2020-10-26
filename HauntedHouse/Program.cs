@@ -780,6 +780,7 @@ namespace HauntedHouse
             gameStart = false; //tells the game the player is now playing the game.
             menu = false; //lets the game your not in the menu screen
             roomDescription.Add(true);
+            roomDescription.Add(true);
             Console.Clear();
         }
 
@@ -891,39 +892,129 @@ namespace HauntedHouse
         //First room of the game
         static public void Room2()
         {
-            if (!roomDirection.Any(c => c.Item1.Contains("Room2west")))
+            //if door doesn't exist, create it
+            if (!objects.Any(c => c.Item1.Contains("Room1door")))
             {
-                roomDirection.Add(Tuple.Create("Room2north", false, "", ""));
-                roomDirection.Add(Tuple.Create("Room2south", false, "", ""));
-                roomDirection.Add(Tuple.Create("Room2east", true, "Room1", ""));
-                roomDirection.Add(Tuple.Create("Room2west", true, "End", ""));
+                objects.Add(Tuple.Create("Room1door",
+                                         false,
+                                         "you open the door",
+                                         "Why would lock yourself in? You only just unlocked it!",
+                                         "key",
+                                         "describe the door"));
+            }
+            //if bed doesn't exist, create it
+            if (!objects.Any(c => c.Item1.Contains("Room2bed")))
+            {
+                objects.Add(Tuple.Create("Room2bed", //Name of object
+                                         false,        //State of the object
+                                         "You don’t want to lie on this bed, there is mold everywhere", //text when first activate
+                                         "no, THERE IS MOLD!", //text when activating the second time.
+                                         "lie", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "so moldy"));      //text describing what it is when the "player" looks at it  
+            }
+            if (!objects.Any(c => c.Item1.Contains("Room2DuchessMirror")))
+            {
+                objects.Add(Tuple.Create("Room2DuchessMirror", //Name of object
+                                         false,        //State of the object
+                                         "Has the jewelry box on top. Go to duchess to access jewelry box.", //text when first activate
+                                         "maybe you should look in the jewelry box", //text when activating the second time.
+                                         "look", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "describe the duchess"));      //text describing what it is when the "player" looks at it  
+            }
+            if (!objects.Any(c => c.Item1.Contains("Room2jewelrybox")))
+            {
+                objects.Add(Tuple.Create("Room2jewelrybox", //Name of object
+                                         false,        //State of the object
+                                         "The music screeches and falters, in the box, lying on a bed of faded velvet lies an amulet with some paper folded underneath. " +
+                                         "The amulet is antique gold with large cracked emerald in the center. ",//text when first activate
+                                         "you've already looked in, now what?", //text when activating the second time.
+                                         "open", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "describe the jewelry box"));      //text describing what it is when the "player" looks at it  
+            }
+            if (!objects.Any(c => c.Item1.Contains("Room2amulet")))
+            {
+                objects.Add(Tuple.Create("Room2amulet", //Name of object
+                                         false,        //State of the object
+                                         "You turn it over it has R.A.B inscribed on the back.", //text when first activate
+                                         "maybe you should take it", //text when activating the second time.
+                                         "take", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "Old gold appearance with a large emerald, " +
+                                         "inscription of R.A.B on the back"));//text describing what it is when the "player" looks at it  
+            }
+            if (!objects.Any(c => c.Item1.Contains("Room2paper")))
+            {
+                objects.Add(Tuple.Create("Room2paper", //Name of object
+                                         false,        //State of the object
+                                         "Touch at your own risk… When worn this amulet allows the wearer to see those on the " +
+                                         "‘other side’…but know this, if you can see them, they can see you…If you’ve touched it, " +
+                                         "it’s too late, they know you’re here…", //text when first activate
+                                         "now what?", //text when activating the second time.
+                                         "read", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "Folded up paper under the amulet...what could be on it?"));//text describing what it is when the "player" looks at it  
             }
 
-            text = "You step through the door and find yourself in an old bedroom. Thick dust is everywhere, like the first room, it has been untouched for years. " +
-                "Mold is eating away at the bed spread. The curtains hang in strips letting in a little moonlight. " +
-                "A broken mirror above an old duchess reflects a full moon. " +
-                "You hear strange music coming from the jewelry box upon the duchess. The door you entered from is to the east and another door is to the west. ";
-            if (screenSave.Count > 0)
+            var objectResult = objects.Find(x => x.Item1 == "Room2jewelrybox");
+            //if chest is opened and key doesn't exist, create it
+            if (objectResult.Item2 && (!objects.Any(c => c.Item1.Contains("Room2amulet"))))
             {
-                if (text != screenSave[screenSave.Count - 1])
-                {
-                    ShowMessage();
-                }
+                objects.Add(Tuple.Create("amulet",
+                                         false,
+                                         "You take the amulet",
+                                         "You already have the amulet",
+                                         "take",
+                                         "inscription of R.A.B on the back"));
             }
-            else
+            if (objectResult.Item2 && (!objects.Any(c => c.Item1.Contains("Room2paper"))))
             {
+                objects.Add(Tuple.Create("paper",
+                                         false,
+                                         "You read the paper",
+                                         "You already read the paper",
+                                         "read",
+                                         "Folded up paper under the amulet...what could be on it?"));
+            }
+          
+        
+            //if direction in room1 equals 0, create all the directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room2")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room2north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room2south",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room2east",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room2west",
+                                               true,
+                                               "Room3",
+                                               "The door is not locked"));
+            }
+            //if door is open create direction west with true, and delete original
+            objectResult = objects.Find(x => x.Item1 == "Room1door");
+            if (objectResult.Item2)
+            {
+                var direction = roomDirection.Find(x => x.Item1 == "Room1west"); //finding the tuple
+                roomDirection.Add(Tuple.Create(direction.Item1, true, direction.Item3, direction.Item4)); //creating a new tuple that allows to go through the door
+                roomDirection.Remove(direction); //removing the old tuple
+            }
+
+            //description of the room
+            if (roomDescription[0])
+            {
+                text = "You step through the door and find yourself in an old bedroom. Thick dust is everywhere, like the first room, it has been untouched for years. " +
+                    "Mold is eating away at the bed spread. The curtains hang in strips letting in a little moonlight. A broken mirror above an old duchess reflects a full moon. " +
+                    "You hear strange music coming from the jewelry box upon the duchess. The door you entered from is to the east and another door is to the west. ";
                 ShowMessage();
+                roomDescription[1]=false; 
             }
         }
 
-        //the end sequence
-        public static void End()
-        {
-            Console.Clear();
-            Console.WriteLine("That is the end for now.");
-            Console.WriteLine("Press any key to go back to main menu...");
-            playerLocation = "MainMenu";
-            menu = true;
-        }
     }
 }
+
