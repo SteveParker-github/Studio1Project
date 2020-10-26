@@ -174,6 +174,13 @@ namespace HauntedHouse
                             Take(playerTexts);
                         }
                         break;
+
+                    case "read": //use an item on an object
+                        {
+                            Read(playerTexts);
+                        }
+                        break;
+
                     case "inventory":
                     case "i":
                         {
@@ -718,6 +725,53 @@ namespace HauntedHouse
             else // if nothing written after "take". message
             {
                 text = "Take what?";
+                ShowMessage();
+            }
+        }
+
+        //let the player open something
+        static public void Read(string[] playerTexts)
+        {
+            if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after open and isn't blank
+            {
+                //if any object contains the word the player typed, and in the same location as the player
+                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
+                {
+                    //gets the list of what the object is
+                    var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[1]));
+                    //if the object has the usage of open
+                    if (objectResult.Item5 == "read")
+                    {
+                        //if the object hasn't already been activated
+                        if (!objectResult.Item2)
+                        {
+                            //tell th eplayer the success message and change the status from false to true
+                            text = objectResult.Item3;
+                            ShowMessage();
+                            objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
+                            objects.Remove(objectResult);
+                        }
+                        else //if already activated, message
+                        {
+                            text = objectResult.Item4;
+                            ShowMessage();
+                        }
+                    }
+                    else //if the object can't be operated in that manner. message
+                    {
+                        text = "You can't read that";
+                        ShowMessage();
+                    }
+                }
+                else //if the object didn't exist. message
+                {
+                    text = "I didn't understand after " + playerTexts[0];
+                    ShowMessage();
+                }
+            }
+            else //if th eplayer didn't write anything after 'open'.
+            {
+                text = "Read what?";
                 ShowMessage();
             }
         }
