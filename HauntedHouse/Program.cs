@@ -802,7 +802,7 @@ namespace HauntedHouse
                         //output the current text and reset the string with the current word
                         screenSave.Add(text);
                         Console.WriteLine(text);
-                        text = " " + texts[i];
+                        text = " " + texts[i] + " ";
                     }
                 }
             //at the end, output what ever is left.
