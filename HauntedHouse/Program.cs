@@ -152,6 +152,12 @@ namespace HauntedHouse
                         }
                         break;
 
+                    case "open": //open an object
+                        {
+                            Open(playerTexts);
+                        }
+                        break;
+
                     case "use": //use an item on an object
                         {
                             Use(playerTexts);
@@ -164,11 +170,15 @@ namespace HauntedHouse
                         }
                         break;
 
-                    case "open": //open an object
                     case "take": //take object
+                        {
+                            Take(playerTexts);
+                        }
+                        break;
+
                     case "read": //use an item on an object
                         {
-                            ObjectInteraction(playerTexts);
+                            Read(playerTexts);
                         }
                         break;
 
@@ -259,21 +269,21 @@ namespace HauntedHouse
             Console.SetCursorPosition(0, Console.WindowHeight - 3);
             Console.WriteLine(hr);
 
-            int count = 0;
             //Write out the items the player has on the right hand side of the screen
             foreach (var item in inventory)
             {
+                int count = 0;
                 if (item.Item2 > 0)
                 {
                     Console.SetCursorPosition(middleInv, 3 + count);
                     Console.Write(item.Item1);
                     count++;
                 }
-            }
-            if (count == 0)
-            {
-                Console.SetCursorPosition(middleInv - 2, 3 + count);
-                Console.Write("You have nothing");
+                if (count == 0)
+                {
+                    Console.SetCursorPosition(middleInv - 2, 3 + count);
+                    Console.Write("You have nothing");
+                }
             }
 
             //resets the screen position
@@ -492,11 +502,11 @@ namespace HauntedHouse
         {
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after look and isn't blank
             {
-                //gets the list of what the object is
-                var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any object contains the word the player typed, and in the same location as the player
-                if (objectResult != null)  
+                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))  
                 {
+                    //gets the list of what the object is
+                    var objectResult = objects.Find(x => x.Item1 == playerLocation + playerTexts[1]);
                     //outputs the description string onto the screen
                     text = objectResult.Item6;
                     ShowMessage();
@@ -519,11 +529,11 @@ namespace HauntedHouse
         {
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after go and isn't blank
             {
-                //gets the list of what the direction is
-                var direction = roomDirection.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any direction contains the word the player typed, and in the same location as the player
-                if (direction != null)
+                if (roomDirection.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
                 {
+                    //gets the list of what the direction is
+                    var direction = roomDirection.Find(x => x.Item1 == playerLocation + playerTexts[1]);
                     //if the description isn't blank
                     if (direction.Item3 != "")
                     {
@@ -545,11 +555,6 @@ namespace HauntedHouse
                         ShowMessage();
                     }
                 }
-                else
-                {
-                    text = "I didn't understand after " + playerTexts[0];
-                    ShowMessage();
-                }
             }
             else //if theres nothing after 'go', tell the player the message
             {
@@ -563,21 +568,21 @@ namespace HauntedHouse
         {
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after item and isn't blank
             {
-                //gets the list of what the item is
-                var itemResult = inventory.Find(x => x.Item1.Contains(playerTexts[1]));
                 //if any item contains the word the player typed, and in the same location as the player
-                if (itemResult != null)
+                if (inventory.Any(c => c.Item1.Contains(playerTexts[1])))
                 {
+                    //gets the list of what the item is
+                    var itemResult = inventory.Find(x => x.Item1 == (playerTexts[1]));
                     if (itemResult.Item2 > 0)
                     {
                         //if the player typed more than more than 2 words
                         if (playerTexts.Length > 2)
                         {
-                            //get the list of the object in question
-                            var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[playerTexts.Length - 1]));
                             //if theres an object the player has typed
-                            if (objectResult != null)
+                            if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[playerTexts.Length - 1])))
                             {
+                                //get the list of the object in question
+                                var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[playerTexts.Length - 1]));
                                 //if the object matches the item
                                 if (objectResult.Item5 == itemResult.Item1)
                                 {
@@ -620,11 +625,6 @@ namespace HauntedHouse
                         ShowMessage();
                     }
                 }
-                else
-                {
-                    text = "I didn't understand after " + playerTexts[0];
-                    ShowMessage();
-                }
             }
             else // if couldn't match the item name. message
             {
@@ -634,17 +634,17 @@ namespace HauntedHouse
         }
 
         //let the player open something
-        static public void ObjectInteraction(string[] playerTexts)
+        static public void Open(string[] playerTexts)
         {
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after open and isn't blank
             {
-                //gets the list of what the object is
-                var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any object contains the word the player typed, and in the same location as the player
-                if (objectResult != null)
+                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
                 {
+                    //gets the list of what the object is
+                    var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[1]));
                     //if the object has the usage of open
-                    if (objectResult.Item5 == playerTexts[0])
+                    if (objectResult.Item5 == "open")
                     {
                         //if the object hasn't already been activated
                         if (!objectResult.Item2)
@@ -654,12 +654,6 @@ namespace HauntedHouse
                             ShowMessage();
                             objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                             objects.Remove(objectResult);
-                            var itemResult = inventory.Find(x => x.Item1.Contains(playerTexts[1]));
-                            if (itemResult != null)
-                            {
-                                inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1, itemResult.Item3));
-                                inventory.Remove(itemResult);
-                            }
                         }
                         else //if already activated, message
                         {
@@ -669,7 +663,7 @@ namespace HauntedHouse
                     }
                     else //if the object can't be operated in that manner. message
                     {
-                        text = "You can't " + playerTexts[0] + " that";
+                        text = "You can't open that";
                         ShowMessage();
                     }
                 }
@@ -681,11 +675,107 @@ namespace HauntedHouse
             }
             else //if th eplayer didn't write anything after 'open'.
             {
-                text = playerTexts[0] + " what?";
+                text = "Open what?";
                 ShowMessage();
             }
         }
 
+        //let player take an item
+        static public void Take(string[] playerTexts)
+        {
+            if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after take and isn't blank
+            {
+                //if any object contains the word the player typed, and in the same location as the player
+                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
+                {
+                    //gets the list of what the object is
+                    var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[1]));
+                    //if the object has the usage of take
+                    if (objectResult.Item5 == "take")
+                    {
+                        //if the object hasn't been activated
+                        if (!objectResult.Item2)
+                        {
+                            //show success message, change the status from false to true. change the item status by increasing its number by 1.
+                            text = objectResult.Item3;
+                            ShowMessage();
+                            objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
+                            objects.Remove(objectResult);
+                            var itemResult = inventory.Find(x => x.Item1 == (playerTexts[1]));
+                            inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1, itemResult.Item3));
+                            inventory.Remove(itemResult);
+                        }
+                        else //if the object has already been activated. message
+                        {
+                            text = objectResult.Item4;
+                            ShowMessage();
+                        }
+                    }
+                    else //if the object can't be used like that. message
+                    {
+                        text = "You can't take that";
+                        ShowMessage();
+                    }
+                }
+                else //if object didn't exist. message
+                {
+                    text = "I didn't understand after " + playerTexts[0];
+                    ShowMessage();
+                }
+            }
+            else // if nothing written after "take". message
+            {
+                text = "Take what?";
+                ShowMessage();
+            }
+        }
+
+        //let the player open something
+        static public void Read(string[] playerTexts)
+        {
+            if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after open and isn't blank
+            {
+                //if any object contains the word the player typed, and in the same location as the player
+                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
+                {
+                    //gets the list of what the object is
+                    var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[1]));
+                    //if the object has the usage of open
+                    if (objectResult.Item5 == "read")
+                    {
+                        //if the object hasn't already been activated
+                        if (!objectResult.Item2)
+                        {
+                            //tell th eplayer the success message and change the status from false to true
+                            text = objectResult.Item3;
+                            ShowMessage();
+                            objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
+                            objects.Remove(objectResult);
+                        }
+                        else //if already activated, message
+                        {
+                            text = objectResult.Item4;
+                            ShowMessage();
+                        }
+                    }
+                    else //if the object can't be operated in that manner. message
+                    {
+                        text = "You can't read that";
+                        ShowMessage();
+                    }
+                }
+                else //if the object didn't exist. message
+                {
+                    text = "I didn't understand after " + playerTexts[0];
+                    ShowMessage();
+                }
+            }
+            else //if th eplayer didn't write anything after 'open'.
+            {
+                text = "Read what?";
+                ShowMessage();
+            }
+        }
         static public void MainMenu()
         {
             List<string> title = new List<string>();
@@ -746,8 +836,10 @@ namespace HauntedHouse
             playerLocation = "Room1"; //players starting location
             gameStart = false; //tells the game the player is now playing the game.
             menu = false; //lets the game your not in the menu screen
-            roomDescription.Add(true);
-            roomDescription.Add(true);
+            roomDescription.Add(true);//room1
+            roomDescription.Add(true);//room2
+            roomDescription.Add(true);//room3
+            roomDescription.Add(true);//room4
             Console.Clear();
         }
 
@@ -981,10 +1073,122 @@ namespace HauntedHouse
                     "Mold is eating away at the bed spread. The curtains hang in strips letting in a little moonlight. A broken mirror above an old duchess reflects a full moon. " +
                     "You hear strange music coming from the jewelrybox upon the duchess. The door you entered from is to the east and another door is to the west. ";
                 ShowMessage();
-                roomDescription[1]=false; 
+                roomDescription[1]=false;
+                roomDescription[2] = true;
             }
         }
 
+        //Hallway
+        static public void Room3()
+        {
+            if (!objects.Any(c => c.Item1.Contains("Room3portraits")))
+            {
+                objects.Add(Tuple.Create("Room3portraits",
+                                         false,
+                                         "You can not remove them.",
+                                         "You can not remove them.",
+                                         "use",
+                                         "All these people look haunted and miserable; " +
+                                         "you feel unnerved and look away. You don’t" +
+                                         " like the way their eyes follow you"));
+            }
+            
+            if (!objects.Any(c => c.Item1.Contains("Room3rats")))
+            {
+                objects.Add(Tuple.Create("Room3rats", //Name of object
+                                         false,        //State of the object
+                                         "You attempt to grab one, and recieve a nast bite for your efforts", //text when first activate
+                                         "That ended badly last time", //text when activating the second time.
+                                         "", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "The rats look desiesed and sickly"));      //text describing what it is when the "player" looks at it  
+            }
+            if (!objects.Any(c => c.Item1.Contains("Room3stairs")))
+            {
+                objects.Add(Tuple.Create("Room3stairs", //Name of object
+                                         false,        //State of the object
+                                         "You decend the stairs", //text when first activate
+                                         "You navigate the stairs", //text when activating the second time.
+                                         "use", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "The stairs look rickety but should hold your weight"));      //text describing what it is when the "player" looks at it  
+            }
+         
+            //if direction in room1 equals 0, create all the directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room3")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room3north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               "You peek inside. Nothing but broken furniture and rats, a large dark stain in the " +
+                                               "center. Something awful happened in this room. You can feel it."));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room3south",
+                                               true,
+                                               "Room2",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room3east",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room3west",
+                                               true,
+                                               "Room4",
+                                               ""));
+            }
+            //description of the room
+            if (roomDescription[2])
+            {
+                text = "You enter the hallway; you are on the " +
+                    "top floor of what looks like a two story " +
+                    "house long abandoned by previous tenants." +
+                    " Faded portraits from the Victorian era line " +
+                    "the walls. You see another room at the end of " +
+                    "the hallway, the door is hanging off the hinges. " +
+                    "To your left, stairs lead down to the ground floor.";
+                ShowMessage();
+                roomDescription[2] = false;
+                roomDescription[1] = true;
+            }
+
+        }
+
+        //Foyer
+        static public void Room4()
+        {
+            if (roomDirection.Count(c => c.Item1.Contains("Room4")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room4north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room4south",
+                                               true,
+                                               "Room3",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room4east",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room3west",
+                                               false,
+                                               "",
+                                               ""));
+            }
+            //description of the room
+            if (roomDescription[3])
+            {
+                text = "You walk down slowly, some of these stairs look like they " +
+                    "won’t hold your weight, as you near the bottom, footsteps sound" +
+                    " at the top. You turn around, no one is there. Is it your imagination?" +
+                    " The stairs feel like they are never ending despite there only being 15" +
+                    " or so. You finally reach the bottom. By this time, you have broken out in" +
+                    " a cold sweat, every step you took, another followed, only shadows were" +
+                    " there when you looked back. You are facing the front door; the kitchen lies to" +
+                    " the right, a drawing room to the left. A rack beside the bottom of the stairs holds a moth eaten fur coat";
+                ShowMessage();
+                roomDescription[3] = false;
+                roomDescription[2] = true;
+            }
+
+        }
     }
 }
 
