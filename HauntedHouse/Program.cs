@@ -493,7 +493,7 @@ namespace HauntedHouse
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after look and isn't blank
             {
                 //gets the list of what the object is
-                var objectResult = objects.Find(x => x.Item1 == playerLocation + playerTexts[1]);
+                var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any object contains the word the player typed, and in the same location as the player
                 if (objectResult != null)  
                 {
@@ -520,7 +520,7 @@ namespace HauntedHouse
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after go and isn't blank
             {
                 //gets the list of what the direction is
-                var direction = roomDirection.Find(x => x.Item1 == playerLocation + playerTexts[1]);
+                var direction = roomDirection.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any direction contains the word the player typed, and in the same location as the player
                 if (direction != null)
                 {
@@ -564,7 +564,7 @@ namespace HauntedHouse
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after item and isn't blank
             {
                 //gets the list of what the item is
-                var itemResult = inventory.Find(x => x.Item1 == (playerTexts[1]));
+                var itemResult = inventory.Find(x => x.Item1.Contains(playerTexts[1]));
                 //if any item contains the word the player typed, and in the same location as the player
                 if (itemResult != null)
                 {
@@ -574,7 +574,7 @@ namespace HauntedHouse
                         if (playerTexts.Length > 2)
                         {
                             //get the list of the object in question
-                            var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[playerTexts.Length - 1]));
+                            var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[playerTexts.Length - 1]));
                             //if theres an object the player has typed
                             if (objectResult != null)
                             {
@@ -639,7 +639,7 @@ namespace HauntedHouse
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after open and isn't blank
             {
                 //gets the list of what the object is
-                var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[1]));
+                var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any object contains the word the player typed, and in the same location as the player
                 if (objectResult != null)
                 {
@@ -654,7 +654,7 @@ namespace HauntedHouse
                             ShowMessage();
                             objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                             objects.Remove(objectResult);
-                            var itemResult = inventory.Find(x => x.Item1 == (playerTexts[1]));
+                            var itemResult = inventory.Find(x => x.Item1.Contains(playerTexts[1]));
                             if (itemResult != null)
                             {
                                 inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1, itemResult.Item3));
