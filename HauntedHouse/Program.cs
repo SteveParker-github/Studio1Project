@@ -269,21 +269,21 @@ namespace HauntedHouse
             Console.SetCursorPosition(0, Console.WindowHeight - 3);
             Console.WriteLine(hr);
 
+            int count = 0;
             //Write out the items the player has on the right hand side of the screen
             foreach (var item in inventory)
             {
-                int count = 0;
                 if (item.Item2 > 0)
                 {
                     Console.SetCursorPosition(middleInv, 3 + count);
                     Console.Write(item.Item1);
                     count++;
                 }
-                if (count == 0)
-                {
-                    Console.SetCursorPosition(middleInv - 2, 3 + count);
-                    Console.Write("You have nothing");
-                }
+            }
+            if (count == 0)
+            {
+                Console.SetCursorPosition(middleInv - 2, 3 + count);
+                Console.Write("You have nothing");
             }
 
             //resets the screen position
