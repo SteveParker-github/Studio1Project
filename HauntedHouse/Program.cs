@@ -152,12 +152,6 @@ namespace HauntedHouse
                         }
                         break;
 
-                    case "open": //open an object
-                        {
-                            Open(playerTexts);
-                        }
-                        break;
-
                     case "use": //use an item on an object
                         {
                             Use(playerTexts);
@@ -170,15 +164,11 @@ namespace HauntedHouse
                         }
                         break;
 
+                    case "open": //open an object
                     case "take": //take object
-                        {
-                            Take(playerTexts);
-                        }
-                        break;
-
                     case "read": //use an item on an object
                         {
-                            Read(playerTexts);
+                            ObjectInteraction(playerTexts);
                         }
                         break;
 
@@ -269,21 +259,21 @@ namespace HauntedHouse
             Console.SetCursorPosition(0, Console.WindowHeight - 3);
             Console.WriteLine(hr);
 
+            int count = 0;
             //Write out the items the player has on the right hand side of the screen
             foreach (var item in inventory)
             {
-                int count = 0;
                 if (item.Item2 > 0)
                 {
                     Console.SetCursorPosition(middleInv, 3 + count);
                     Console.Write(item.Item1);
                     count++;
                 }
-                if (count == 0)
-                {
-                    Console.SetCursorPosition(middleInv - 2, 3 + count);
-                    Console.Write("You have nothing");
-                }
+            }
+            if (count == 0)
+            {
+                Console.SetCursorPosition(middleInv - 2, 3 + count);
+                Console.Write("You have nothing");
             }
 
             //resets the screen position
@@ -502,11 +492,11 @@ namespace HauntedHouse
         {
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after look and isn't blank
             {
+                //gets the list of what the object is
+                var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any object contains the word the player typed, and in the same location as the player
-                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))  
+                if (objectResult != null)
                 {
-                    //gets the list of what the object is
-                    var objectResult = objects.Find(x => x.Item1 == playerLocation + playerTexts[1]);
                     //outputs the description string onto the screen
                     text = objectResult.Item6;
                     ShowMessage();
@@ -529,11 +519,11 @@ namespace HauntedHouse
         {
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after go and isn't blank
             {
+                //gets the list of what the direction is
+                var direction = roomDirection.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any direction contains the word the player typed, and in the same location as the player
-                if (roomDirection.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
+                if (direction != null)
                 {
-                    //gets the list of what the direction is
-                    var direction = roomDirection.Find(x => x.Item1 == playerLocation + playerTexts[1]);
                     //if the description isn't blank
                     if (direction.Item3 != "")
                     {
@@ -555,6 +545,11 @@ namespace HauntedHouse
                         ShowMessage();
                     }
                 }
+                else
+                {
+                    text = "I didn't understand after " + playerTexts[0];
+                    ShowMessage();
+                }
             }
             else //if theres nothing after 'go', tell the player the message
             {
@@ -568,21 +563,21 @@ namespace HauntedHouse
         {
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after item and isn't blank
             {
+                //gets the list of what the item is
+                var itemResult = inventory.Find(x => x.Item1.Contains(playerTexts[1]));
                 //if any item contains the word the player typed, and in the same location as the player
-                if (inventory.Any(c => c.Item1.Contains(playerTexts[1])))
+                if (itemResult != null)
                 {
-                    //gets the list of what the item is
-                    var itemResult = inventory.Find(x => x.Item1 == (playerTexts[1]));
                     if (itemResult.Item2 > 0)
                     {
                         //if the player typed more than more than 2 words
                         if (playerTexts.Length > 2)
                         {
+                            //get the list of the object in question
+                            var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[playerTexts.Length - 1]));
                             //if theres an object the player has typed
-                            if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[playerTexts.Length - 1])))
+                            if (objectResult != null)
                             {
-                                //get the list of the object in question
-                                var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[playerTexts.Length - 1]));
                                 //if the object matches the item
                                 if (objectResult.Item5 == itemResult.Item1)
                                 {
@@ -625,6 +620,11 @@ namespace HauntedHouse
                         ShowMessage();
                     }
                 }
+                else
+                {
+                    text = "I didn't understand after " + playerTexts[0];
+                    ShowMessage();
+                }
             }
             else // if couldn't match the item name. message
             {
@@ -634,17 +634,17 @@ namespace HauntedHouse
         }
 
         //let the player open something
-        static public void Open(string[] playerTexts)
+        static public void ObjectInteraction(string[] playerTexts)
         {
             if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after open and isn't blank
             {
+                //gets the list of what the object is
+                var objectResult = objects.Find(x => x.Item1.Contains(playerLocation + playerTexts[1]));
                 //if any object contains the word the player typed, and in the same location as the player
-                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
+                if (objectResult != null)
                 {
-                    //gets the list of what the object is
-                    var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[1]));
                     //if the object has the usage of open
-                    if (objectResult.Item5 == "open")
+                    if (objectResult.Item5 == playerTexts[0])
                     {
                         //if the object hasn't already been activated
                         if (!objectResult.Item2)
@@ -654,6 +654,12 @@ namespace HauntedHouse
                             ShowMessage();
                             objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                             objects.Remove(objectResult);
+                            var itemResult = inventory.Find(x => x.Item1.Contains(playerTexts[1]));
+                            if (itemResult != null)
+                            {
+                                inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1, itemResult.Item3));
+                                inventory.Remove(itemResult);
+                            }
                         }
                         else //if already activated, message
                         {
@@ -663,7 +669,7 @@ namespace HauntedHouse
                     }
                     else //if the object can't be operated in that manner. message
                     {
-                        text = "You can't open that";
+                        text = "You can't " + playerTexts[0] + " that";
                         ShowMessage();
                     }
                 }
@@ -675,107 +681,11 @@ namespace HauntedHouse
             }
             else //if th eplayer didn't write anything after 'open'.
             {
-                text = "Open what?";
+                text = playerTexts[0] + " what?";
                 ShowMessage();
             }
         }
 
-        //let player take an item
-        static public void Take(string[] playerTexts)
-        {
-            if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after take and isn't blank
-            {
-                //if any object contains the word the player typed, and in the same location as the player
-                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
-                {
-                    //gets the list of what the object is
-                    var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[1]));
-                    //if the object has the usage of take
-                    if (objectResult.Item5 == "take")
-                    {
-                        //if the object hasn't been activated
-                        if (!objectResult.Item2)
-                        {
-                            //show success message, change the status from false to true. change the item status by increasing its number by 1.
-                            text = objectResult.Item3;
-                            ShowMessage();
-                            objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
-                            objects.Remove(objectResult);
-                            var itemResult = inventory.Find(x => x.Item1 == (playerTexts[1]));
-                            inventory.Add(Tuple.Create(itemResult.Item1, itemResult.Item2 + 1, itemResult.Item3));
-                            inventory.Remove(itemResult);
-                        }
-                        else //if the object has already been activated. message
-                        {
-                            text = objectResult.Item4;
-                            ShowMessage();
-                        }
-                    }
-                    else //if the object can't be used like that. message
-                    {
-                        text = "You can't take that";
-                        ShowMessage();
-                    }
-                }
-                else //if object didn't exist. message
-                {
-                    text = "I didn't understand after " + playerTexts[0];
-                    ShowMessage();
-                }
-            }
-            else // if nothing written after "take". message
-            {
-                text = "Take what?";
-                ShowMessage();
-            }
-        }
-
-        //let the player open something
-        static public void Read(string[] playerTexts)
-        {
-            if ((playerTexts.Length > 1) && (playerTexts[1] != "")) //if theres more words after open and isn't blank
-            {
-                //if any object contains the word the player typed, and in the same location as the player
-                if (objects.Any(c => c.Item1.Contains(playerLocation + playerTexts[1])))
-                {
-                    //gets the list of what the object is
-                    var objectResult = objects.Find(x => x.Item1 == (playerLocation + playerTexts[1]));
-                    //if the object has the usage of open
-                    if (objectResult.Item5 == "read")
-                    {
-                        //if the object hasn't already been activated
-                        if (!objectResult.Item2)
-                        {
-                            //tell th eplayer the success message and change the status from false to true
-                            text = objectResult.Item3;
-                            ShowMessage();
-                            objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
-                            objects.Remove(objectResult);
-                        }
-                        else //if already activated, message
-                        {
-                            text = objectResult.Item4;
-                            ShowMessage();
-                        }
-                    }
-                    else //if the object can't be operated in that manner. message
-                    {
-                        text = "You can't read that";
-                        ShowMessage();
-                    }
-                }
-                else //if the object didn't exist. message
-                {
-                    text = "I didn't understand after " + playerTexts[0];
-                    ShowMessage();
-                }
-            }
-            else //if th eplayer didn't write anything after 'open'.
-            {
-                text = "Read what?";
-                ShowMessage();
-            }
-        }
         static public void MainMenu()
         {
             List<string> title = new List<string>();
