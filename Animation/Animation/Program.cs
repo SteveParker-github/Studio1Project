@@ -6,44 +6,63 @@ namespace _
 {
     class Program
     {
-        //This is the the method that prints the animation out to the screen. The first argument specifies the time between frames. The second specifies the number of frames used, and the rest point to the relevant .txt files to be used
-        public static void Animation(int delay, int framenumber, string file1, string file2, string file3, string file4, string file5)
+        //This is the the method that prints the animation out to the screen. The first argument specifies the time between frames. The second specifies the file to read from
+        public static void Animation(int delay, string file)
         {
-            string aline, file;
+            string aline;
+            string filePath = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
+            filePath = Directory.GetParent(Directory.GetParent(filePath).FullName).FullName;
+            filePath = Directory.GetParent(Directory.GetParent(filePath).FullName).FullName;
 
-            for (int i = 0; i < framenumber; i++)
+            StreamReader frame = new StreamReader(filePath + "/" + @file);
+            while (!frame.EndOfStream)
             {
-                //assigns the file to be read based on the current frame
-                switch (i)
+                aline = frame.ReadLine();
+                if (aline == "break") //when adding animations, put all the frames into a single .txt file, and add only the word "break" on it's own line inbetween
                 {
-                    default:
-                        file = file1;
-                        break;
-                    case 1:
-                        file = file2;
-                        break;
-                    case 2:
-                        file = file3;
-                        break;
-                    case 3:
-                        file = file4;
-                        break;
-                    case 4:
-                        file = file5;
-                        break;
+                    Thread.Sleep(delay);
+                    Console.Clear();
                 }
-                Console.Clear();
-                StreamReader frame = new StreamReader(@file);
-                string everyline = frame.ReadToEnd();
-                Console.WriteLine(everyline);
-                
-                frame.Close();
-                Thread.Sleep(delay);
+                else
+                {
+                    Console.WriteLine(aline);
+                }
             }
+
+            //for (int i = 0; i < framenumber; i++)
+            //{
+                              
+            //    //assigns the file to be read based on the current frame
+            //    switch (i)
+            //    {
+            //        default:
+            //            file = file1;
+            //            break;
+            //        case 1:
+            //            file = file2;
+            //            break;
+            //        case 2:
+            //            file = file3;
+            //            break;
+            //        case 3:
+            //            file = file4;
+            //            break;
+            //        case 4:
+            //            file = file5;
+            //            break;
+            //    }
+            //    Console.Clear();
+            //    StreamReader frame = new StreamReader(@file);
+            //    string everyline = frame.ReadToEnd();
+            //    Console.WriteLine(everyline);
+                
+            //    frame.Close();
+            //    Thread.Sleep(delay);
+            //}
         }
         static void Main(string[] args)
         {
-            Animation(1500, 4, "test1.txt", "test2.txt", "test3.txt", "test4.txt", "x");
+            Animation(1500, "test.txt");
             Console.Read();
         }
     }

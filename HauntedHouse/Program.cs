@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace HauntedHouse
 {
@@ -865,6 +866,30 @@ namespace HauntedHouse
             //at the end, output what ever is left.
             screenSave.Add(text);
             Console.WriteLine(text);
+        }
+
+        //This is the the method that prints the animation out to the screen. The first argument specifies the time between frames. The second specifies the file to read from
+        public static void Animation(int delay, string file)
+        {
+            string aline;
+            string filePath = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
+            filePath = Directory.GetParent(Directory.GetParent(filePath).FullName).FullName;
+            filePath = Directory.GetParent(Directory.GetParent(filePath).FullName).FullName;
+
+            StreamReader frame = new StreamReader(filePath + "/" + @file);
+            while (!frame.EndOfStream)
+            {
+                aline = frame.ReadLine();
+                if (aline == "break") //when adding animations, put all the frames into a single .txt file, and add only the word "break" on it's own line inbetween
+                {
+                    Thread.Sleep(delay);
+                    Console.Clear();
+                }
+                else
+                {
+                    Console.WriteLine(aline);
+                }
+            }
         }
 
         //First room of the game, Use this as the template
