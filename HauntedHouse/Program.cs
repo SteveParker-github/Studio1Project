@@ -750,6 +750,8 @@ namespace HauntedHouse
             roomDescription.Add(true);//room2
             roomDescription.Add(true);//room3
             roomDescription.Add(true);//room4
+            roomDescription.Add(true);//room5
+            roomDescription.Add(true);//room6
             Console.Clear();
         }
 
@@ -1074,12 +1076,12 @@ namespace HauntedHouse
                                                "Room3",
                                                ""));
                 roomDirection.Add(Tuple.Create("Room4east",
-                                               false,
-                                               "",
+                                               true,
+                                               "Room5",
                                                ""));
-                roomDirection.Add(Tuple.Create("Room3west",
-                                               false,
-                                               "",
+                roomDirection.Add(Tuple.Create("Room4west",
+                                               true,
+                                               "Room6",
                                                ""));
             }
             //description of the room
@@ -1096,9 +1098,96 @@ namespace HauntedHouse
                 ShowMessage();
                 roomDescription[3] = false;
                 roomDescription[2] = true;
+                roomDescription[4] = true;
+                roomDescription[5] = true;
+            }
+
+        }
+
+        //Kitchen
+        static public void Room5()
+        {
+            //Objects
+            if (!objects.Any(c => c.Item1.Contains("Room5rats")))
+            {
+                objects.Add(Tuple.Create("Room5rats",
+                                         false,
+                                         "That was.......messy.",
+                                         "Please refrain from mutilating the local fauna.",
+                                         "open",
+                                         "The rats crawl over the bench and tables. " +
+                                         "They seem unconcerned by your prescence."));
+            }
+
+            //Directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room5")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room5north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room5south",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room5east",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room5west",
+                                               true,
+                                               "Room4",
+                                               ""));
+            }
+            //description of the room
+            if (roomDescription[4])
+            {
+                text = "More rats. A door that looks like it might lead to the backyard is across the room";
+                ShowMessage();
+                roomDescription[3] = true;
+                roomDescription[4] = false;
+            }
+
+        }
+
+        //Drawing Room
+        static public void Room6()
+        {
+            if (roomDirection.Count(c => c.Item1.Contains("Room6")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room6north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room6south",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room6east",
+                                               true,
+                                               "Room4",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room6west",
+                                               false,
+                                               "",
+                                               ""));
+            }
+            //description of the room
+            if (roomDescription[5])
+            {
+                text = "A couch and two chairs surround a mahogany table with intricately " +
+                    "carved with legs displaying flowers and vines. This lounge set would fetch " +
+                    "thousands in an antique’s auction, if only it had been properly stored. Mold " +
+                    "has eaten into what once must have been plush red velvet. On the coffee table " +
+                    "lies a candle holder with a fresh candle. No other rooms lead off this room.";
+                ShowMessage();
+                roomDescription[3] = true;
+                roomDescription[5] = false;
             }
 
         }
     }
+
+
 }
 
