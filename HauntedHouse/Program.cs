@@ -743,6 +743,7 @@ namespace HauntedHouse
             inventory.Add(Tuple.Create("key", 0, "It's a shiny key.... only joking, its rusted beyond believe but still works.")); //Room1 key to unlock the door in Room1.
             inventory.Add(Tuple.Create("amulet", 0, "The amulet is antique gold with large cracked emerald in the center.")); //Room1 key to unlock the door in Room1.
             inventory.Add(Tuple.Create("paper", 0, "Folded up paper under the amulet...what could be on it?")); //Room1 key to unlock the door in Room1.
+            inventory.Add(Tuple.Create("candle", 0, "A burning candle."));//Room6 candle for Room4 stairs
             playerLocation = "Room1"; //players starting location
             gameStart = false; //tells the game the player is now playing the game.
             menu = false; //lets the game your not in the menu screen
@@ -752,6 +753,9 @@ namespace HauntedHouse
             roomDescription.Add(true);//room4
             roomDescription.Add(true);//room5
             roomDescription.Add(true);//room6
+            roomDescription.Add(true);//room7
+            roomDescription.Add(true);//room8
+            roomDescription.Add(true);//room9
             Console.Clear();
         }
 
@@ -761,22 +765,22 @@ namespace HauntedHouse
             int maxWidth = Console.WindowWidth - (Console.WindowWidth / 4); //the maximum width allowed
             string[] texts = text.Split(" "); //split the string into each word
             text = " "; //reset the text string to a single space.
-                for (int i = 0; i < texts.Length; i++)
+            for (int i = 0; i < texts.Length; i++)
+            {
+                //if the current text plus the next word is less or equal to the maximum width allowed
+                if ((text.Length + texts[i].Length + 1) <= maxWidth)
                 {
-                    //if the current text plus the next word is less or equal to the maximum width allowed
-                    if ((text.Length + texts[i].Length + 1) <= maxWidth) 
-                    {
-                        //add the next word plus a space
-                        text = text + texts[i] + " ";
-                    }
-                    else //if the maximum width has been exceeded
-                    {
-                        //output the current text and reset the string with the current word
-                        screenSave.Add(text);
-                        Console.WriteLine(text);
-                        text = " " + texts[i] + " ";
-                    }
+                    //add the next word plus a space
+                    text = text + texts[i] + " ";
                 }
+                else //if the maximum width has been exceeded
+                {
+                    //output the current text and reset the string with the current word
+                    screenSave.Add(text);
+                    Console.WriteLine(text);
+                    text = " " + texts[i] + " ";
+                }
+            }
             //at the end, output what ever is left.
             screenSave.Add(text);
             Console.WriteLine(text);
@@ -948,7 +952,7 @@ namespace HauntedHouse
                                          "read",
                                          "Folded up paper under the amulet...what could be on it?"));
             }
-        
+
             //if direction in room1 equals 0, create all the directions
             if (roomDirection.Count(c => c.Item1.Contains("Room2")) == 0)
             {
@@ -985,7 +989,7 @@ namespace HauntedHouse
                     "Mold is eating away at the bed spread. The curtains hang in strips letting in a little moonlight. A broken mirror above an old duchess reflects a full moon. " +
                     "You hear strange music coming from the jewelrybox upon the duchess. The door you entered from is to the east and another door is to the west. ";
                 ShowMessage();
-                roomDescription[1]=false;
+                roomDescription[1] = false;
                 roomDescription[2] = true;
             }
         }
@@ -1004,7 +1008,7 @@ namespace HauntedHouse
                                          "you feel unnerved and look away. You don’t" +
                                          " like the way their eyes follow you"));
             }
-            
+
             if (!objects.Any(c => c.Item1.Contains("Room3rats")))
             {
                 objects.Add(Tuple.Create("Room3rats", //Name of object
@@ -1023,7 +1027,7 @@ namespace HauntedHouse
                                          "use", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
                                          "The stairs look rickety but should hold your weight"));      //text describing what it is when the "player" looks at it  
             }
-         
+
             //if direction in room1 equals 0, create all the directions
             if (roomDirection.Count(c => c.Item1.Contains("Room3")) == 0)
             {
@@ -1065,6 +1069,42 @@ namespace HauntedHouse
         //Foyer
         static public void Room4()
         {
+            
+            //Objects
+            if (!objects.Any(c => c.Item1.Contains("Room4coat")))
+            {
+                objects.Add(Tuple.Create("Room4coat",
+                                         false,
+                                         "You move the coat aside aside to reveal a hidden door.",
+                                         "You return the coat to the rack",
+                                         "open", //should be move
+                                         "The coats is old and worn. They smell of age and decay. Strangely you feel a slight breeze as you near them."));
+            }
+
+            //Object status checks
+            //Move the coat to reveal a door
+            var objectResult = objects.Find(x => x.Item1 == "Room4coat");
+            if (objectResult.Item2 && (!objects.Any(c => c.Item1.Contains("Room4door"))))
+            {
+                objects.Add(Tuple.Create("Room4door",
+                                         false,
+                                         "You open the door and descend a staircase",
+                                         "You open the door and descend a staircase",
+                                         "open",
+                                         "It appears to lead to a basement"));
+                //Open the door to descend the staircase
+                objectResult = objects.Find(x => x.Item1 == "Room4door");
+                if (objectResult.Item2)
+                {
+                    Console.WriteLine("You open the door");
+                }
+            }
+            
+            
+            //if chest is opened and key doesn't exist, create it
+            
+
+            //Directions
             if (roomDirection.Count(c => c.Item1.Contains("Room4")) == 0)
             {
                 roomDirection.Add(Tuple.Create("Room4north", //what room this is and what direction
@@ -1100,6 +1140,7 @@ namespace HauntedHouse
                 roomDescription[2] = true;
                 roomDescription[4] = true;
                 roomDescription[5] = true;
+                roomDescription[6] = true;
             }
 
         }
@@ -1118,6 +1159,7 @@ namespace HauntedHouse
                                          "The rats crawl over the bench and tables. " +
                                          "They seem unconcerned by your prescence."));
             }
+            
 
             //Directions
             if (roomDirection.Count(c => c.Item1.Contains("Room5")) == 0)
@@ -1153,6 +1195,18 @@ namespace HauntedHouse
         //Drawing Room
         static public void Room6()
         {
+            //Objects
+            if (!objects.Any(c => c.Item1.Contains("Room6candle")))
+            {
+                objects.Add(Tuple.Create("Room6candle",
+                                         false,
+                                         "",
+                                         "",
+                                         "take",
+                                         "The candle burns brightly in the otherwise dim room."));
+            }
+
+            //Directions
             if (roomDirection.Count(c => c.Item1.Contains("Room6")) == 0)
             {
                 roomDirection.Add(Tuple.Create("Room6north", //what room this is and what direction
@@ -1186,8 +1240,61 @@ namespace HauntedHouse
             }
 
         }
+
+        //Stairs
+        static public void Room7()
+        {
+            //Objects
+            if (!objects.Any(c => c.Item1.Contains("Room7stairs")))
+            {
+                objects.Add(Tuple.Create("Room7stairs", //Name of object
+                                         false,        //State of the object
+                                         "You descend the stairs aided by your trusty everlasting candle.", //text when first activate
+                                         "You descend the stairs.", //text when activating the second time.
+                                         "candle", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "The stairwell is pitch black. To descend could be dangerous."));      //text describing what it is when the "player" looks at it  
+            }
+
+            var objectResult = objects.Find(x => x.Item1 == "Room4stairs");
+
+            if (objectResult.Item2)
+            {
+                playerLocation = "Stairs are clear";
+            }
+
+            //Directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room7")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room7north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room7south",
+                                               true,
+                                               "Room4",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room7east",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room7west",
+                                               false,
+                                               "",
+                                               ""));
+            }
+            //description of the room
+            if (roomDescription[6])
+            {
+                text = "You are on the stair";
+                ShowMessage();
+                roomDescription[3] = true;
+                roomDescription[6] = false;
+            }
+
+        }
     }
 
 
 }
+
 
