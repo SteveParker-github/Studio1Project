@@ -1092,20 +1092,31 @@ namespace HauntedHouse
                                          "You open the door and descend a staircase",
                                          "open",
                                          "It appears to lead to a basement"));
-                //Open the door to descend the staircase
+            }
+            //Return door to closed
+            if (objectResult.Item2 && (objects.Any(c => c.Item1.Contains("Room4door"))) && (roomDescription[3] == true))
+            {
+                var doorState = objects.Find(x => x.Item1 == "Room4door");
+                objects.Add(Tuple.Create("Room4door",
+                                         false,
+                                         "You open the door and descend a staircase",
+                                         "You open the door and descend a staircase",
+                                         "open",
+                                         "It appears to lead to a basement"));
+                objects.Remove(doorState);
+            }
+            //Open the door to descend the staircase
+            if (objectResult.Item2 && (objects.Any(c => c.Item1.Contains("Room4door"))))
+            {
                 objectResult = objects.Find(x => x.Item1 == "Room4door");
                 if (objectResult.Item2)
                 {
-                    Console.WriteLine("You open the door");
+                    playerLocation = "Room7";
                 }
             }
-            
-            
-            //if chest is opened and key doesn't exist, create it
-            
 
             //Directions
-            if (roomDirection.Count(c => c.Item1.Contains("Room4")) == 0)
+                if (roomDirection.Count(c => c.Item1.Contains("Room4")) == 0)
             {
                 roomDirection.Add(Tuple.Create("Room4north", //what room this is and what direction
                                                false,        //is the player able to go this way   
@@ -1249,25 +1260,18 @@ namespace HauntedHouse
             {
                 objects.Add(Tuple.Create("Room7stairs", //Name of object
                                          false,        //State of the object
-                                         "You descend the stairs aided by your trusty everlasting candle.", //text when first activate
-                                         "You descend the stairs.", //text when activating the second time.
+                                         "You may now descend the stairs aided by your trusty everlasting candle.", //text when first activate
+                                         "You can safely descend the stairs.", //text when activating the second time.
                                          "candle", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
                                          "The stairwell is pitch black. To descend could be dangerous."));      //text describing what it is when the "player" looks at it  
-            }
-
-            var objectResult = objects.Find(x => x.Item1 == "Room4stairs");
-
-            if (objectResult.Item2)
-            {
-                playerLocation = "Stairs are clear";
             }
 
             //Directions
             if (roomDirection.Count(c => c.Item1.Contains("Room7")) == 0)
             {
                 roomDirection.Add(Tuple.Create("Room7north", //what room this is and what direction
-                                               false,        //is the player able to go this way   
-                                               "",           //the name of the method it will go           
+                                               true,        //is the player able to go this way   
+                                               "DeathByStairs",           //the name of the method it will go           
                                                ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
                 roomDirection.Add(Tuple.Create("Room7south",
                                                true,
@@ -1282,15 +1286,72 @@ namespace HauntedHouse
                                                "",
                                                ""));
             }
+
+            //If candle used on stairs
+            var objectResult = objects.Find(x => x.Item1 == "Room7stairs");
+            if (objectResult.Item2)
+            {
+                var direction = roomDirection.Find(x => x.Item1 == "Room7north"); //finding the tuple
+                roomDirection.Add(Tuple.Create(direction.Item1, direction.Item2, "Room8", direction.Item4)); //creating a new tuple that allows to go through the door
+                roomDirection.Remove(direction); //removing the old tuple
+            }
+
             //description of the room
             if (roomDescription[6])
             {
-                text = "You are on the stair";
+                text = "As you descend the stairs you are engulfed in darkness. To continue further could prove dangerous";
                 ShowMessage();
                 roomDescription[3] = true;
                 roomDescription[6] = false;
             }
 
+        }
+
+        //Passage
+        public static void Room8()
+        {
+            //Directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room8")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room8north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room8south",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room8east",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room8west",
+                                               false,
+                                               "",
+                                               ""));
+            }
+            //Room description
+            if (roomDescription[7])
+            {
+                text = "You make it down the stairs without falling; if " +
+                    "it weren’t for the candle you likely would have " +
+                    "broken your back. An old armchair sits in one of the " +
+                    "corners piled high with porcelain dolls with cracked " +
+                    "and peeling faces. A huge weighted trapdoor sits over " +
+                    "a round cement well in the center of the room. A small " +
+                    "stone sits beside the well. In another corner there is a " +
+                    "painting of what was once a beautiful young woman, she appears sad in the painting.";
+                ShowMessage();
+                roomDescription[6] = true;
+                roomDescription[7] = false;
+            }
+        }
+
+        //If player uses room7 stairs without candle
+        public static void DeathByStairs()
+        {
+            text = "Death by stairs!";
+            ShowMessage();
         }
     }
 
