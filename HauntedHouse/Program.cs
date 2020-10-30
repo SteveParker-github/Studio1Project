@@ -744,6 +744,7 @@ namespace HauntedHouse
             inventory.Add(Tuple.Create("amulet", 0, "The amulet is antique gold with large cracked emerald in the center.")); //Room1 key to unlock the door in Room1.
             inventory.Add(Tuple.Create("paper", 0, "Folded up paper under the amulet...what could be on it?")); //Room1 key to unlock the door in Room1.
             inventory.Add(Tuple.Create("candle", 0, "A burning candle."));//Room6 candle for Room4 stairs
+            inventory.Add(Tuple.Create("stone", 0, "A small stone."));//Room8 stone for throwing down well
             playerLocation = "Room1"; //players starting location
             gameStart = false; //tells the game the player is now playing the game.
             menu = false; //lets the game your not in the menu screen
@@ -1303,6 +1304,7 @@ namespace HauntedHouse
                 ShowMessage();
                 roomDescription[3] = true;
                 roomDescription[6] = false;
+                roomDescription[7] = true;
             }
 
         }
@@ -1310,6 +1312,44 @@ namespace HauntedHouse
         //Passage
         public static void Room8()
         {
+            //Objects
+            if (!objects.Any(c => c.Item1.Contains("Room8dolls")))
+            {
+                objects.Add(Tuple.Create("Room8dolls", //Name of object
+                                         false,        //State of the object
+                                         "", //text when first activate
+                                         "dolls activated", //text when activating the second time.
+                                         "", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "You move towards the dolls, as you take your second step, one slips of the pile and crashes to the floor, further shattering it’s already damaged face, you look back at the pile and you swear that some of expressions changed… You back away slowly"));      //text describing what it is when the "player" looks at it  
+            }
+            if (!objects.Any(c => c.Item1.Contains("Room8trapdoor")))
+            {
+                objects.Add(Tuple.Create("Room8trapdoor", //Name of object
+                                         false,        //State of the object
+                                         "", //text when first activate
+                                         "", //text when activating the second time.
+                                         "", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "The trap door is locked shut with chains well rusted over the years."));      //text describing what it is when the "player" looks at it  
+            }
+            if (!objects.Any(c => c.Item1.Contains("Room8bookcase")))
+            {
+                objects.Add(Tuple.Create("Room8bookcase", //Name of object
+                                         false,        //State of the object
+                                         "With some effort the bookcase swings aside to reveal a stone tunnel.", //text when first activate
+                                         "", //text when activating the second time.
+                                         "open", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "There is nothing on the shelves, but you do notice that the case is sitting at an odd angle, not quite flush with the wall. You feel a slight breeze."));      //text describing what it is when the "player" looks at it  
+            }
+            if (!objects.Any(c => c.Item1.Contains("Room8stone")))
+            {
+                objects.Add(Tuple.Create("Room8stone",
+                                         false,
+                                         "",
+                                         "",
+                                         "take",
+                                         "It is a small stone."));
+            }
+
             //Directions
             if (roomDirection.Count(c => c.Item1.Contains("Room8")) == 0)
             {
@@ -1318,8 +1358,8 @@ namespace HauntedHouse
                                                "",           //the name of the method it will go           
                                                ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
                 roomDirection.Add(Tuple.Create("Room8south",
-                                               false,
-                                               "",
+                                               true,
+                                               "Room7",
                                                ""));
                 roomDirection.Add(Tuple.Create("Room8east",
                                                false,
