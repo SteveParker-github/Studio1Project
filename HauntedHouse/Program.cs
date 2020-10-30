@@ -52,6 +52,20 @@ namespace HauntedHouse
         private static bool menu;                //checks to see if the game is in the menu
         private static string playerLocation;            //the location the of the player. 
 
+        //enum for the room names
+        public enum RoomNames
+        {
+            Spare_room = 1,
+            Bedroom,
+            Hallway,
+            Foyer,
+            Kitchen,
+            Drawing_room,
+            Stairs,
+            Basement,
+            Tunnel
+        }
+
         //Main method
         static void Main(string[] args)
         {
@@ -224,7 +238,16 @@ namespace HauntedHouse
 
             //set the cursor at the top left
             Console.SetCursorPosition(1, 0);
-            Console.Write("Location: " + playerLocation); //write the location of the player
+
+            //finds the room name and converts it to a string
+            int roomNumber = Convert.ToInt16(playerLocation.Replace("Room", ""));
+            string roomName = Convert.ToString((RoomNames)roomNumber);
+            //If its a multiword, replace the underscore with a space
+            if (roomName.Contains("_"))
+            {
+                roomName = roomName.Replace("_", " ");
+            }
+            Console.Write("Location: " + roomName); //write the location of the player
 
             //set the cursor to write out the score
             Console.SetCursorPosition(quarterWidth + quarterWidth / 2, 0);
