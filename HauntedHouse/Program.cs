@@ -167,6 +167,7 @@ namespace HauntedHouse
                     case "open": //open an object
                     case "take": //take object
                     case "read": //use an item on an object
+                    case "move": //move the object.
                         {
                             ObjectInteraction(playerTexts);
                         }
@@ -777,13 +778,31 @@ namespace HauntedHouse
                 {
                     //output the current text and reset the string with the current word
                     screenSave.Add(text);
-                    Console.WriteLine(text);
                     text = " " + texts[i] + " ";
                 }
             }
             //at the end, output what ever is left.
             screenSave.Add(text);
-            Console.WriteLine(text);
+            Console.SetCursorPosition(0, 2);
+            string hr = "";
+            for (int i = 0; i < maxWidth; i++)
+            {
+                hr = hr + " ";
+            }
+            for (int i = 0; i < SCREENSAVECOUNT; i++)
+            {
+                Console.WriteLine(hr);
+            }
+            Console.SetCursorPosition(0, 2);
+            //Cull the list to fit onto the screen
+            if (screenSave.Count > SCREENSAVECOUNT)
+            {
+                screenSave.RemoveRange(0, screenSave.Count - SCREENSAVECOUNT);
+            }
+            foreach (string line in screenSave) //output any saved text to reload onto the screen
+            {
+                Console.WriteLine(line);
+            }
         }
 
         //This is the the method that prints the animation out to the screen. The first argument specifies the time between frames. The second specifies the file to read from
@@ -1077,7 +1096,7 @@ namespace HauntedHouse
                                          false,
                                          "You move the coat aside aside to reveal a hidden door.",
                                          "You return the coat to the rack",
-                                         "open", //should be move
+                                         "move", //should be move
                                          "The coats is old and worn. They smell of age and decay. Strangely you feel a slight breeze as you near them."));
             }
 
