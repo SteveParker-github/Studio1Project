@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -53,6 +54,7 @@ namespace HauntedHouse
         private static string playerLocation;            //the location the of the player. 
         private static int ScreenSaveCount = Console.WindowHeight - 5; //the size of the screen available for the main text.
         private static List<string> maze;       //Keeps a track of where the player went in the maze
+        private static SoundPlayer soundPlayer;
         //enum for the room names
         public enum RoomNames
         {
@@ -89,6 +91,8 @@ namespace HauntedHouse
             playerLocation = "MainMenu"; //tells the game where the player is
             menu = true;  //checks if the player is in the menu
             bool exit = false; //bool to get out of the loop
+            soundPlayer = new SoundPlayer(Properties.Resources.Thunder);
+            soundPlayer.Play();
             do
             {
                 Console.Clear();
