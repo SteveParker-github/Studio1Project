@@ -54,7 +54,9 @@ namespace HauntedHouse
         private static string playerLocation;            //the location the of the player. 
         private static int ScreenSaveCount = Console.WindowHeight - 5; //the size of the screen available for the main text.
         private static List<string> maze;       //Keeps a track of where the player went in the maze
-        private static SoundPlayer soundPlayer;
+        private static SoundPlayer soundPlayer; //plays the sounds
+        private static List<string> endingTexts; //similar to screensave but does the entire screen.
+
         //enum for the room names
         public enum RoomNames
         {
@@ -90,6 +92,7 @@ namespace HauntedHouse
             score = 0;      //the score tally, not currently working
             playerLocation = "MainMenu"; //tells the game where the player is
             menu = true;  //checks if the player is in the menu
+            endingTexts = new List<string>();
             bool exit = false; //bool to get out of the loop
             soundPlayer = new SoundPlayer(Properties.Resources.Thunder);
             soundPlayer.Play();
@@ -98,11 +101,18 @@ namespace HauntedHouse
                 Console.Clear();
                 if (!menu)
                 {
-                    DisplayUI();
-                    if (maze.Count == 5)
+                    if (CheckEnding())
                     {
-                        MazeChecker();
+                        Ending();
+                    }
+                    else
+                    {
                         DisplayUI();
+                        if (maze.Count == 5)
+                        {
+                            MazeChecker();
+                            DisplayUI();
+                        }
                     }
                 }
                 else
@@ -1458,13 +1468,23 @@ namespace HauntedHouse
                                                ""));
                 roomDirection.Add(Tuple.Create("Room8east",
                                                false,
-                                               "",
+                                               "Room9",
                                                ""));
                 roomDirection.Add(Tuple.Create("Room8west",
                                                false,
                                                "",
                                                ""));
             }
+
+            //if door is open create direction west with true, and delete original
+            var objectResult = objects.Find(x => x.Item1 == "Room8bookcase");
+            if (objectResult.Item2)
+            {
+                var direction = roomDirection.Find(x => x.Item1 == "Room8east"); //finding the tuple
+                roomDirection.Add(Tuple.Create(direction.Item1, true, direction.Item3, direction.Item4)); //creating a new tuple that allows to go through the door
+                roomDirection.Remove(direction); //removing the old tuple
+            }
+
             //Room description
             if (roomDescription[7])
             {
@@ -1475,7 +1495,8 @@ namespace HauntedHouse
                     "and peeling faces. A huge weighted trapdoor sits over " +
                     "a round cement well in the center of the room. A small " +
                     "stone sits beside the well. In another corner there is a " +
-                    "painting of what was once a beautiful young woman, she appears sad in the painting.";
+                    "painting of what was once a beautiful young woman, she appears sad in the painting. " +
+                    "To the east, there is a bookcase.";
                 ShowMessage();
                 roomDescription[6] = true;
                 roomDescription[7] = false;
@@ -1640,6 +1661,117 @@ namespace HauntedHouse
                 ShowMessage();
                 roomDescription[11] = false;
             }
+        }
+        
+        public static bool CheckEnding()
+        {
+            bool end = false;
+            var objectResult = objects.Find(x => x.Item1.Contains("Room12ghost"));
+
+            if (objectResult != null)
+            {
+                if (objectResult.Item2)
+                {
+                    end = true;
+                }
+            }
+            return end;
+        }
+
+
+        public static void Ending()
+        {
+            text = "“My name is Rose Abigail Black; thank you for finding me. " +
+                "I have waited so long. " +
+                "Almost 200 years ago this was my home, I was happy… " +
+                "My father said it was time I was married and that he had arranged for it to be so with the " +
+                "son of another affluent family in town. " +
+                "His name was Henry H. Holmes, he was so handsome. I was thrilled with the match… ";
+
+            EditEndingText();
+
+            text = "Then it all started to go wrong, " +
+                "behind his keen intellect and charming personality lay the soul of a monster. " +
+                "He treated me most violently, " +
+                "I was desperate to get away before the marriage took place and before being taken from my home and left in his care. " +
+                "I went to my father, I showed him the marks left upon my pale skin from his latest attentions. " +
+                "At once, my father called him to the house and declared that the marriage would no longer take place. " +
+                "Henry was furious, he stormed from the house. " +
+                "I breathed a sigh of relief, believing myself finally safe. ";
+
+            EditEndingText();
+
+            text = "That night he returned. " +
+                "With a knife taken from the kitchen he bounded up the stairs to my parent’s bedroom and brutally murdered them. " +
+                "Next, he entered my room, bound my wrists, stabbed me once in the stomach and dragged me down the stairs. " +
+                "Even the maids in the drawing room were not spared as they were found hiding from the commotion behind the couch. ";
+
+            EditEndingText();
+
+            text = "I was dragged down more stairs to the basement. " +
+                "He snatched the locket from my neck and threw me down the old well in which the house had been built over. " +
+                "He locked me inside. There I splashed and screamed until the loss of blood finally drained away my life force. " +
+                "Here I have waited for someone to find me. ";
+
+            EditEndingText();
+
+            text = "Henry haunts the upper levels of this house, his soul not pure enough to pass on, " +
+                "his only joy is knowing I am trapped here with him. " +
+                "I have waited for someone to hear my story and return to me my most precious possession, " +
+                "the amulet given to me at birth by my father, he said it would protect me. " +
+                "Only by wearing it again can I leave this place.";
+
+            EditEndingText();
+
+            ShowEnding();
+            menu = true;
+        }
+
+
+        public static void EditEndingText()
+        {
+            int maxWidth = Console.WindowWidth; //the maximum width allowed
+            string[] texts = text.Split(" "); //split the string into each word
+            text = " "; //reset the text string to a single space.
+            for (int i = 0; i < texts.Length; i++)
+            {
+                //if the current text plus the next word is less or equal to the maximum width allowed
+                if ((text.Length + texts[i].Length + 1) < maxWidth)
+                {
+                    //add the next word plus a space
+                    text = text + texts[i] + " ";
+                }
+                else //if the maximum width has been exceeded
+                {
+                    //output the current text and reset the string with the current word
+                    endingTexts.Add(text);
+                    text = " " + texts[i] + " ";
+                }
+            }
+            //at the end, output what ever is left.
+            endingTexts.Add(text);
+            endingTexts.Add("Break");
+        }
+
+        public static void ShowEnding()
+        {
+
+            Console.Clear();
+
+            foreach (string line in endingTexts) //output any saved text to reload onto the screen
+            {
+                if (line == "Break")
+                {
+                    Console.WriteLine();
+                    Thread.Sleep(6000);
+                }
+                else
+                {
+                    Console.WriteLine(line);
+                }
+            }
+
+            Console.WriteLine("Press any key to go back to the main menu");
         }
     }
 
