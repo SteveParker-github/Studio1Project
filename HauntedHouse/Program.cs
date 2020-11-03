@@ -460,7 +460,7 @@ namespace HauntedHouse
                 {
                     case "look":
                         {
-                            text = "Use to look at certain objects. For exmaple 'look chest'.";
+                            text = "Use to look at certain objects. For example 'look chest'.";
                             ShowMessage();
                         }
                         break;
@@ -504,7 +504,7 @@ namespace HauntedHouse
             }
             else
             {
-                text = "Current commands you can use: look, go, use, take, open, help, main, save, load, exit.";
+                text = "Current commands you can use: look, go, use, take, open, read, help, main, save, load, exit.";
                 ShowMessage();
                 text = "Type 'help [command]' for more information";
                 ShowMessage();
@@ -864,7 +864,7 @@ namespace HauntedHouse
                                          "You opened the chest. There is a key inside", //text when first activate
                                          "the chest is already open", //text when activating the second time.
                                          "open", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
-                                         "describe the chest"));      //text describing what it is when the "player" looks at it  
+                                         "Old wooden chest"));      //text describing what it is when the "player" looks at it  
             }
             //if door doesn't exist, create it
             if (!objects.Any(c => c.Item1.Contains("Room1door")))
@@ -874,7 +874,7 @@ namespace HauntedHouse
                                          "you open the door",
                                          "Why would lock yourself in? You only just unlocked it!",
                                          "key",
-                                         "describe the door"));
+                                         "It's a door..."));
             }
 
             var objectResult = objects.Find(x => x.Item1 == "Room1chest");
@@ -886,7 +886,7 @@ namespace HauntedHouse
                                          "You take the key",
                                          "You already have the key",
                                          "take",
-                                         "describe the key"));
+                                         "Old brass key"));
             }
             //if direction in room1 equals 0, create all the directions
             if (roomDirection.Count(c => c.Item1.Contains("Room1")) == 0)
@@ -922,7 +922,7 @@ namespace HauntedHouse
             {
                 text = "You awaken in a dark room you do not recognize. " +
                         "You are cold and lying on the wooden floorboards in the center of the room. " +
-                        "Through the window moonlight illuminates the few objects in the room. " +
+                        "Through the window, moonlight illuminates the few objects in the room. " +
                         "An old chest lies in the corner under a thick layer of dust. " +
                         "It is as if the house has not been lived in in many years. " +
                         "There is a door to the west.";
@@ -942,17 +942,17 @@ namespace HauntedHouse
                                          "you open the door",
                                          "Why would lock yourself in? You only just unlocked it!",
                                          "key",
-                                         "describe the door"));
+                                         "It's a door..."));
             }
             //if bed doesn't exist, create it
             if (!objects.Any(c => c.Item1.Contains("Room2bed")))
             {
                 objects.Add(Tuple.Create("Room2bed", //Name of object
                                          false,        //State of the object
-                                         "You don’t want to lie on this bed, there is mold everywhere", //text when first activate
+                                         "Old bed", //text when first activate
                                          "no, THERE IS MOLD!", //text when activating the second time.
                                          "lie", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
-                                         "faded and so moldy"));      //text describing what it is when the "player" looks at it  
+                                         "You don’t want to lie on this bed, there is mold everywhere"));//text describing what it is when the "player" looks at it  
             }
             if (!objects.Any(c => c.Item1.Contains("Room2duchess")))
             {
@@ -1030,7 +1030,7 @@ namespace HauntedHouse
             {
                 text = "You step through the door and find yourself in an old bedroom. Thick dust is everywhere, like the first room, it has been untouched for years. " +
                     "Mold is eating away at the bed spread. The curtains hang in strips letting in a little moonlight. A broken mirror above an old duchess reflects a full moon. " +
-                    "You hear strange music coming from the jewelrybox upon the duchess. The door you entered from is to the east and another door is to the west. ";
+                    "You hear strange music coming from the jewelry box upon the duchess. The door you entered from is to the east and another door is to the west. ";
                 ShowMessage();
                 roomDescription[1] = false;
                 roomDescription[2] = true;
@@ -1059,14 +1059,14 @@ namespace HauntedHouse
                                          "You attempt to grab one, and recieve a nast bite for your efforts", //text when first activate
                                          "That ended badly last time", //text when activating the second time.
                                          "", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
-                                         "The rats look desiesed and sickly"));      //text describing what it is when the "player" looks at it  
+                                         "The rats look diseased and sickly"));      //text describing what it is when the "player" looks at it  
             }
             if (!objects.Any(c => c.Item1.Contains("Room3stairs")))
             {
                 objects.Add(Tuple.Create("Room3stairs", //Name of object
                                          false,        //State of the object
-                                         "You decend the stairs", //text when first activate
-                                         "You navigate the stairs", //text when activating the second time.
+                                         "You look down the stairs", //text when first activate
+                                         "You look down the stairs", //text when activating the second time.
                                          "use", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
                                          "The stairs look rickety but should hold your weight"));      //text describing what it is when the "player" looks at it  
             }
@@ -1099,9 +1099,9 @@ namespace HauntedHouse
                     "top floor of what looks like a two story " +
                     "house long abandoned by previous tenants." +
                     " Faded portraits from the Victorian era line " +
-                    "the walls. You see another room at the end of " +
+                    "the walls. You see another room at the south end of " +
                     "the hallway, the door is hanging off the hinges. " +
-                    "To your left, stairs lead down to the ground floor.";
+                    "To the west, stairs lead down to the ground floor.";
                 ShowMessage();
                 roomDescription[2] = false;
                 roomDescription[1] = true;
@@ -1118,10 +1118,10 @@ namespace HauntedHouse
             {
                 objects.Add(Tuple.Create("Room4coat",
                                          false,
-                                         "You move the coat aside aside to reveal a hidden door.",
+                                         "You move the coat aside to reveal a hidden door.",
                                          "You return the coat to the rack",
                                          "move", //should be move
-                                         "The coats is old and worn. They smell of age and decay. Strangely you feel a slight breeze as you near them."));
+                                         "The coats is old and worn. They smell of age and decay. Strangely you feel a slight breeze as you near it."));
             }
 
             //Object status checks
@@ -1131,8 +1131,8 @@ namespace HauntedHouse
             {
                 objects.Add(Tuple.Create("Room4door",
                                          false,
-                                         "You open the door and descend a staircase",
-                                         "You open the door and descend a staircase",
+                                         "You open the door and look down a staircase",
+                                         "You open the door and look down a staircase",
                                          "open",
                                          "It appears to lead to a basement"));
             }
@@ -1142,8 +1142,8 @@ namespace HauntedHouse
                 var doorState = objects.Find(x => x.Item1 == "Room4door");
                 objects.Add(Tuple.Create("Room4door",
                                          false,
-                                         "You open the door and descend a staircase",
-                                         "You open the door and descend a staircase",
+                                         "You open the door and look down a staircase",
+                                         "You open the door and look down a staircase",
                                          "open",
                                          "It appears to lead to a basement"));
                 objects.Remove(doorState);
@@ -1188,7 +1188,7 @@ namespace HauntedHouse
                     " or so. You finally reach the bottom. By this time, you have broken out in" +
                     " a cold sweat, every step you took, another followed, only shadows were" +
                     " there when you looked back. You are facing the front door; the kitchen lies to" +
-                    " the right, a drawing room to the left. A rack beside the bottom of the stairs holds a moth eaten fur coat";
+                    " the east, a drawing room to the west. A rack beside the bottom of the stairs holds a moth eaten fur coat";
                 ShowMessage();
                 roomDescription[3] = false;
                 roomDescription[2] = true;
@@ -1306,7 +1306,7 @@ namespace HauntedHouse
                                          "You may now descend the stairs aided by your trusty everlasting candle.", //text when first activate
                                          "You can safely descend the stairs.", //text when activating the second time.
                                          "candle", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
-                                         "The stairwell is pitch black. To descend could be dangerous."));      //text describing what it is when the "player" looks at it  
+                                         "The stairwell is pitch black. To descent could be dangerous."));      //text describing what it is when the "player" looks at it  
             }
 
             //Directions
@@ -1380,7 +1380,7 @@ namespace HauntedHouse
                                          "With some effort the bookcase swings aside to reveal a stone tunnel.", //text when first activate
                                          "", //text when activating the second time.
                                          "open", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
-                                         "There is nothing on the shelves, but you do notice that the case is sitting at an odd angle, not quite flush with the wall. You feel a slight breeze."));      //text describing what it is when the "player" looks at it  
+                                         "There is nothing on the shelves, but you do notice that the bookcase is sitting at an odd angle, not quite flush with the wall. You feel a slight breeze."));      //text describing what it is when the "player" looks at it  
             }
             if (!objects.Any(c => c.Item1.Contains("Room8stone")))
             {
