@@ -38,7 +38,6 @@ namespace HauntedHouse
 
         //Constants
         private const string FILELOCATION = @"save.txt";
-        private const int SCREENSAVECOUNT = 23;
 
         //Fields
         private static List<Tuple<string, bool, string, string, string, string>> objects; //keeps a track of all the work the player has done in a certain room. 
@@ -51,6 +50,7 @@ namespace HauntedHouse
         private static bool gameStart;           //checks to see if the game has started or not
         private static bool menu;                //checks to see if the game is in the menu
         private static string playerLocation;            //the location the of the player. 
+        private static int ScreenSaveCount = Console.WindowHeight - 5; //the size of the screen available for the main text.
 
         //enum for the room names
         public enum RoomNames
@@ -305,9 +305,9 @@ namespace HauntedHouse
             Console.SetCursorPosition(0, 2);
 
             //Cull the list to fit onto the screen
-            if (screenSave.Count > SCREENSAVECOUNT)
+            if (screenSave.Count > ScreenSaveCount)
             {
-                screenSave.RemoveRange(0, screenSave.Count - SCREENSAVECOUNT);
+                screenSave.RemoveRange(0, screenSave.Count - ScreenSaveCount);
             }
             foreach (string line in screenSave) //output any saved text to reload onto the screen
             {
@@ -367,9 +367,9 @@ namespace HauntedHouse
             }
 
             //removes strings if above certain count and saves each line.
-            if (screenSave.Count > SCREENSAVECOUNT)
+            if (screenSave.Count > ScreenSaveCount)
             {
-                screenSave.RemoveRange(0, screenSave.Count - SCREENSAVECOUNT);
+                screenSave.RemoveRange(0, screenSave.Count - ScreenSaveCount);
             }
             //saves all the screen text
             sw.WriteLine(screenSave.Count);
@@ -813,15 +813,15 @@ namespace HauntedHouse
             {
                 hr = hr + " ";
             }
-            for (int i = 0; i < SCREENSAVECOUNT; i++)
+            for (int i = 0; i < ScreenSaveCount; i++)
             {
                 Console.WriteLine(hr);
             }
             Console.SetCursorPosition(0, 2);
             //Cull the list to fit onto the screen
-            if (screenSave.Count > SCREENSAVECOUNT)
+            if (screenSave.Count > ScreenSaveCount)
             {
-                screenSave.RemoveRange(0, screenSave.Count - SCREENSAVECOUNT);
+                screenSave.RemoveRange(0, screenSave.Count - ScreenSaveCount);
             }
             foreach (string line in screenSave) //output any saved text to reload onto the screen
             {
