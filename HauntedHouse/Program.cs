@@ -38,6 +38,7 @@ namespace HauntedHouse
 
         //Constants
         private const string FILELOCATION = @"save.txt";
+        private const string MAZEANSWER = "EEWEW";
 
         //Fields
         private static List<Tuple<string, bool, string, string, string, string>> objects; //keeps a track of all the work the player has done in a certain room. 
@@ -51,7 +52,7 @@ namespace HauntedHouse
         private static bool menu;                //checks to see if the game is in the menu
         private static string playerLocation;            //the location the of the player. 
         private static int ScreenSaveCount = Console.WindowHeight - 5; //the size of the screen available for the main text.
-
+        private static List<string> maze;       //Keeps a track of where the player went in the maze
         //enum for the room names
         public enum RoomNames
         {
@@ -63,7 +64,8 @@ namespace HauntedHouse
             Drawing_room,
             Stairs,
             Basement,
-            Tunnel
+            Tunnel,
+            Unknown = 12
         }
 
         //Main method
@@ -81,6 +83,7 @@ namespace HauntedHouse
             objects = new List<Tuple<string, bool, string, string, string, string>>(); //name of the location and object, have they used the object, if they activate, if they try to activate again.
             roomDirection = new List<Tuple<string, bool, string, string>>(); //name of direction, can the player go that way, the name of the location, reason why they can't go.
             roomDescription = new List<bool>();  //checks whether to show the room description or not
+            maze = new List<string>(); // what position the player went in the maze
             gameStart = true;   //checks whether the game has just started
             score = 0;      //the score tally, not currently working
             playerLocation = "MainMenu"; //tells the game where the player is
@@ -92,6 +95,11 @@ namespace HauntedHouse
                 if (!menu)
                 {
                     DisplayUI();
+                    if (maze.Count == 5)
+                    {
+                        MazeChecker();
+                        DisplayUI();
+                    }
                 }
                 else
                 {
@@ -180,6 +188,7 @@ namespace HauntedHouse
 
                     case "open": //open an object
                     case "take": //take object
+                    case "lay": //lay object
                     case "read": //use an item on an object
                     case "move": //move the object.
                         {
@@ -241,7 +250,41 @@ namespace HauntedHouse
 
             //finds the room name and converts it to a string
             int roomNumber = Convert.ToInt16(playerLocation.Replace("Room", ""));
-            string roomName = Convert.ToString((RoomNames)roomNumber);
+            string roomName;
+            if ((roomNumber == 10) || (roomNumber == 11))
+            {
+                Random random = new Random();
+                switch (random.Next(4))
+                {
+                    case 1:
+                        {
+                            roomName = "???";
+                        }
+                        break;
+
+                    case 2:
+                        {
+                            roomName = "??!!?";
+                        }
+                        break;
+
+                    case 3:
+                        {
+                            roomName = "lost?";
+                        }
+                        break;
+
+                    default:
+                        {
+                            roomName = "Help me!!!";
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                roomName = Convert.ToString((RoomNames)roomNumber);
+            }
             //If its a multiword, replace the underscore with a space
             if (roomName.Contains("_"))
             {
@@ -554,6 +597,7 @@ namespace HauntedHouse
                         //if they are allowed to go through
                         if (direction.Item2)
                         {
+                            score -= 5;
                             //change the player lcoation to the new location
                             playerLocation = direction.Item3;
                         }
@@ -608,6 +652,7 @@ namespace HauntedHouse
                                     //if the object is not activated
                                     if (!objectResult.Item2)
                                     {
+                                        score += 20;
                                         //show the message of success and create the list to change the status from false to true;
                                         text = objectResult.Item3;
                                         ShowMessage();
@@ -673,7 +718,8 @@ namespace HauntedHouse
                         //if the object hasn't already been activated
                         if (!objectResult.Item2)
                         {
-                            //tell th eplayer the success message and change the status from false to true
+                            //tell the player the success message and change the status from false to true
+                            score += 10;
                             text = objectResult.Item3;
                             ShowMessage();
                             objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
@@ -771,7 +817,7 @@ namespace HauntedHouse
             inventory.Add(Tuple.Create("stone", 0, "A small stone."));//Room8 stone for throwing down well
             playerLocation = "Room1"; //players starting location
             gameStart = false; //tells the game the player is now playing the game.
-            menu = false; //lets the game your not in the menu screen
+            menu = false; //lets the game know your not in the menu screen
             roomDescription.Add(true);//room1
             roomDescription.Add(true);//room2
             roomDescription.Add(true);//room3
@@ -780,7 +826,10 @@ namespace HauntedHouse
             roomDescription.Add(true);//room6
             roomDescription.Add(true);//room7
             roomDescription.Add(true);//room8
-            roomDescription.Add(true);//room9
+            roomDescription.Add(true);//room9  Tunnel Main
+            roomDescription.Add(true);//room10 Tunnel West
+            roomDescription.Add(true);//room11 Tunnel East
+            roomDescription.Add(true);//room12 meet the ghost scene
             Console.Clear();
         }
 
@@ -950,9 +999,9 @@ namespace HauntedHouse
                 objects.Add(Tuple.Create("Room2bed", //Name of object
                                          false,        //State of the object
                                          "Old bed", //text when first activate
-                                         "no, THERE IS MOLD!", //text when activating the second time.
-                                         "lie", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
-                                         "You don’t want to lie on this bed, there is mold everywhere"));//text describing what it is when the "player" looks at it  
+                                         "no, THERE IS MOULD!", //text when activating the second time.
+                                         "lay", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "You don’t want to lie on this bed, there is mould everywhere"));//text describing what it is when the "player" looks at it  
             }
             if (!objects.Any(c => c.Item1.Contains("Room2duchess")))
             {
@@ -1112,7 +1161,7 @@ namespace HauntedHouse
         //Foyer
         static public void Room4()
         {
-            
+
             //Objects
             if (!objects.Any(c => c.Item1.Contains("Room4coat")))
             {
@@ -1159,7 +1208,7 @@ namespace HauntedHouse
             }
 
             //Directions
-                if (roomDirection.Count(c => c.Item1.Contains("Room4")) == 0)
+            if (roomDirection.Count(c => c.Item1.Contains("Room4")) == 0)
             {
                 roomDirection.Add(Tuple.Create("Room4north", //what room this is and what direction
                                                false,        //is the player able to go this way   
@@ -1213,7 +1262,7 @@ namespace HauntedHouse
                                          "The rats crawl over the bench and tables. " +
                                          "They seem unconcerned by your prescence."));
             }
-            
+
 
             //Directions
             if (roomDirection.Count(c => c.Item1.Contains("Room5")) == 0)
@@ -1435,8 +1484,160 @@ namespace HauntedHouse
             text = "Death by stairs!";
             ShowMessage();
         }
-    }
 
+        //tunnel main
+        public static void Room9()
+        {
+            
+            //if direction in room1 equals 0, create all the directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room9")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room9north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room9south",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room9east",
+                                               true,
+                                               "Room11",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room9west",
+                                               true,
+                                               "Room10",
+                                               ""));
+            }
+
+            //description of the room
+            if (roomDescription[8])
+            {
+                text = "You can only go east or west";
+                ShowMessage();
+                roomDescription[8] = false;
+            }
+        }
+
+        //tunnel west
+        public static void Room10()
+        {
+
+            //if direction in room1 equals 0, create all the directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room10")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room10north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room10south",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room10east",
+                                               true,
+                                               "Room11",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room10west",
+                                               true,
+                                               "Room10",
+                                               ""));
+            }
+
+            //description of the room
+            if (roomDescription[9])
+            {
+                text = "west tunnel";
+                ShowMessage();
+                roomDescription[9] = false;
+            }
+
+            maze.Add("W");
+
+        }
+
+        //tunnel east
+        public static void Room11()
+        {
+
+            //if direction in room1 equals 0, create all the directions
+            if (roomDirection.Count(c => c.Item1.Contains("Room11")) == 0)
+            {
+                roomDirection.Add(Tuple.Create("Room11north", //what room this is and what direction
+                                               false,        //is the player able to go this way   
+                                               "",           //the name of the method it will go           
+                                               ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                roomDirection.Add(Tuple.Create("Room11south",
+                                               false,
+                                               "",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room11east",
+                                               true,
+                                               "Room11",
+                                               ""));
+                roomDirection.Add(Tuple.Create("Room11west",
+                                               true,
+                                               "Room10",
+                                               ""));
+            }
+
+            //description of the room
+            if (roomDescription[10])
+            {
+                text = "east tunnel";
+                ShowMessage();
+                roomDescription[10] = false;
+            }
+
+            maze.Add("E");
+        }
+
+        public static void MazeChecker()
+        {
+            string wordCheck = "";
+
+            foreach (string word in maze)
+            {
+                wordCheck += word;
+            }
+
+            if (wordCheck == MAZEANSWER)
+            {
+                playerLocation = "Room12";
+            }
+            else
+            {
+                playerLocation = "Room9";
+            }
+            maze.Clear();
+        }
+
+        public static void Room12()
+        {
+            if (!objects.Any(c => c.Item1.Contains("Room12ghost")))
+            {
+                objects.Add(Tuple.Create("Room12ghost", //Name of object
+                                         false,        //State of the object
+                                         "", //text when first activate
+                                         "", //text when activating the second time.
+                                         "amulet", //What verb need to use it, (Might be able to have multiple uses, i.e. "open, move")  
+                                         "You see a ghost in front of you. She seems to be looking for something."));      //text describing what it is when the "player" looks at it  
+            }
+
+
+
+            if (roomDescription[11])
+            {
+                text = "You come to a room and can see the base of the well in the center, " +
+                    "an ethereal barely visible wispy shape forms in front of you. " +
+                    "The longer you look the further the details of the shape develop. " +
+                    "You find yourself face to face with the beautiful young woman from the portrait. " +
+                    "You gasp at her beauty and the sadness in her eyes.";
+                ShowMessage();
+                roomDescription[11] = false;
+            }
+        }
+    }
 
 }
 
