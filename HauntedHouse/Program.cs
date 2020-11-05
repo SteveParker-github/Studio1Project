@@ -226,7 +226,7 @@ namespace HauntedHouse
                                 }
                                 if (counter == 0)
                                 {
-                                    text = "You are carrying nothing... i mean nothing at all, not even lint or a loose string.";
+                                    text = "You are carrying nothing... I mean nothing at all, not even lint or a loose string.";
                                     ShowMessage();
                                 }
 
@@ -545,7 +545,13 @@ namespace HauntedHouse
 
                     case "take":
                         {
-                            text = "Use to take an item. for exmaple 'take key'";
+                            text = "Use to take an item. for example 'take key'";
+                            ShowMessage();
+                        }
+                        break;
+                    case "move":
+                        {
+                            text = "Use to move an item. for example 'move box'";
                             ShowMessage();
                         }
                         break;
@@ -561,7 +567,7 @@ namespace HauntedHouse
             }
             else
             {
-                text = "Current commands you can use: look, go, use, take, open, read, help, main, save, load, exit.";
+                text = "Current commands you can use: look, go, use, move, take, open, read, help, main, save, load, exit.";
                 ShowMessage();
                 text = "Type 'help [command]' for more information";
                 ShowMessage();
@@ -1139,9 +1145,9 @@ namespace HauntedHouse
             {
                 roomDirection.Add(Tuple.Create("Room3north", //what room this is and what direction
                                                false,        //is the player able to go this way   
-                                               "",           //the name of the method it will go           
+                                               "SOMETHING OBSCURE",           //the name of the method it will go           
                                                "You peek inside. Nothing but broken furniture and rats, a large dark stain in the " +
-                                               "center. Something awful happened in this room. You can feel it."));         //The reason they cant go this way, leave as blank if u cant go this way at all
+                                               "center. Something awful happened in this room. You can feel it, you back out immediately."));         //The reason they cant go this way, leave as blank if u cant go this way at all
                 roomDirection.Add(Tuple.Create("Room3south",
                                                true,
                                                "Room2",
@@ -1162,7 +1168,7 @@ namespace HauntedHouse
                     "top floor of what looks like a two story " +
                     "house long abandoned by previous tenants." +
                     " Faded portraits from the Victorian era line " +
-                    "the walls. You see another room at the south end of " +
+                    "the walls. You see another room at the north end of " +
                     "the hallway, the door is hanging off the hinges. " +
                     "To the west, stairs lead down to the ground floor.";
                 ShowMessage();
@@ -1317,7 +1323,7 @@ namespace HauntedHouse
             {
                 objects.Add(Tuple.Create("Room6candle",
                                          false,
-                                         "",
+                                         "you take the candle",
                                          "",
                                          "take",
                                          "The candle burns brightly in the otherwise dim room."));
