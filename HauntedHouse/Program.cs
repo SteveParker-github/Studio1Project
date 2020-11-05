@@ -1383,7 +1383,7 @@ namespace HauntedHouse
             {
                 roomDirection.Add(Tuple.Create("Room7north", //what room this is and what direction
                                                true,        //is the player able to go this way   
-                                               "DeathByStairs",           //the name of the method it will go           
+                                               "Room99",           //the name of the method it will go           
                                                ""));         //The reason they cant go this way, leave as blank if u cant go this way at all
                 roomDirection.Add(Tuple.Create("Room7south",
                                                true,
@@ -1510,7 +1510,7 @@ namespace HauntedHouse
         }
 
         //If player uses room7 stairs without candle
-        public static void DeathByStairs()
+        public static void Room99()
         {
             text = "Death by stairs!";
             ShowMessage();
