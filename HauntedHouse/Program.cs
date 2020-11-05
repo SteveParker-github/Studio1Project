@@ -1211,8 +1211,8 @@ namespace HauntedHouse
                 var doorState = objects.Find(x => x.Item1 == "Room4door");
                 objects.Add(Tuple.Create("Room4door",
                                          false,
-                                         "You open the door and look down a staircase",
-                                         "You open the door and look down a staircase",
+                                         "You open the door and see a dark staircase",
+                                         "You open the door and see a dark staircase",
                                          "open",
                                          "It appears to lead to a basement"));
                 objects.Remove(doorState);
@@ -1223,7 +1223,10 @@ namespace HauntedHouse
                 objectResult = objects.Find(x => x.Item1 == "Room4door");
                 if (objectResult.Item2)
                 {
-                    playerLocation = "Room7";
+                    roomDirection.Add(Tuple.Create("Room4down",
+                                               true,
+                                               "Room7",
+                                               ""));
                 }
             }
 
