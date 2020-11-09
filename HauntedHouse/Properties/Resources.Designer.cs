@@ -63,6 +63,15 @@ namespace HauntedHouse.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
         /// </summary>
+        internal static System.IO.UnmanagedMemoryStream MusicBox {
+            get {
+                return ResourceManager.GetStream("MusicBox", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
         internal static System.IO.UnmanagedMemoryStream Thunder {
             get {
                 return ResourceManager.GetStream("Thunder", resourceCulture);

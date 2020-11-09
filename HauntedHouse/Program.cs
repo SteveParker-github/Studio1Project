@@ -744,6 +744,11 @@ namespace HauntedHouse
                             ShowMessage();
                             objects.Add(Tuple.Create(objectResult.Item1, true, objectResult.Item3, objectResult.Item4, objectResult.Item5, objectResult.Item6));
                             objects.Remove(objectResult);
+                            if (objectResult.Item1 == "Room2jewelrybox")
+                            {
+                                soundPlayer = new SoundPlayer(Properties.Resources.MusicBox);
+                                soundPlayer.Play();
+                            }
                             var itemResult = inventory.Find(x => x.Item1.Contains(playerTexts[1]));
                             if (itemResult != null)
                             {
