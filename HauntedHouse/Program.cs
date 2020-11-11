@@ -96,6 +96,7 @@ namespace HauntedHouse
             bool exit = false; //bool to get out of the loop
             soundPlayer = new SoundPlayer(Properties.Resources.Thunder);
             soundPlayer.Play();
+            Animation(500, "Intro.txt");
             do
             {
                 Console.Clear();
@@ -909,22 +910,41 @@ namespace HauntedHouse
             string aline;
             string filePath = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
             filePath = Directory.GetParent(Directory.GetParent(filePath).FullName).FullName;
-            filePath = Directory.GetParent(Directory.GetParent(filePath).FullName).FullName;
+            filePath = Directory.GetParent(filePath).FullName;
 
             StreamReader frame = new StreamReader(filePath + "/" + @file);
             while (!frame.EndOfStream)
             {
                 aline = frame.ReadLine();
-                if (aline == "break") //when adding animations, put all the frames into a single .txt file, and add only the word "break" on it's own line inbetween
+                if ((aline == "break") || (aline == "fill"))  //when adding animations, put all the frames into a single .txt file, and add only the word "break" on it's own line inbetween
                 {
-                    Thread.Sleep(delay);
-                    Console.Clear();
+                    if (aline == "break")
+                    {
+                        Thread.Sleep(delay);
+                        Console.Clear();
+                    }
+                    else
+                    {
+                        string hr = "";
+                        for (int i = 0; i < Console.WindowWidth - 1; i++)
+                        {
+                            hr = hr + "█";
+                        }
+                        for (int i = 0; i < Console.WindowHeight; i++)
+                        {
+                            Console.WriteLine(hr);
+                        }
+                    }
                 }
                 else
                 {
-                    Console.WriteLine(aline);
+                    Console.WriteLine(String.Format("{0," +
+                               ((Console.WindowWidth / 2) +
+                               (aline.Length / 2)) +
+                               "}", aline));
                 }
             }
+            Thread.Sleep(2000);
         }
 
         //First room of the game, Use this as the template
