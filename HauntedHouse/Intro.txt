@@ -25,6 +25,9 @@
        │          #  │└┘ │ └┘│   #          │               
        │             └───┴───┘          #   │               
        └───────────└───────────┘────────────┘               
+wait
+wait
+thunder
 break
 fill
 break
@@ -48,4 +51,14 @@ break
 ├──┤│  ││  │└─┐ ├── 
 │  ││  ││  │  │ │   
 │  │└──┘\──/──┘ └── 
-                                
+   
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait

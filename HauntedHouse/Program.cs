@@ -94,8 +94,6 @@ namespace HauntedHouse
             menu = true;  //checks if the player is in the menu
             endingTexts = new List<string>();
             bool exit = false; //bool to get out of the loop
-            soundPlayer = new SoundPlayer(Properties.Resources.Thunder);
-            soundPlayer.Play();
             Animation(500, "Intro.txt");
             do
             {
@@ -916,35 +914,52 @@ namespace HauntedHouse
             while (!frame.EndOfStream)
             {
                 aline = frame.ReadLine();
-                if ((aline == "break") || (aline == "fill"))  //when adding animations, put all the frames into a single .txt file, and add only the word "break" on it's own line inbetween
+                switch (aline)
                 {
-                    if (aline == "break")
-                    {
-                        Thread.Sleep(delay);
-                        Console.Clear();
-                    }
-                    else
-                    {
-                        string hr = "";
-                        for (int i = 0; i < Console.WindowWidth - 1; i++)
+                    case "break":
                         {
-                            hr = hr + "█";
+                            Thread.Sleep(delay);
+                            Console.Clear();
                         }
-                        for (int i = 0; i < Console.WindowHeight; i++)
+                        break;
+
+                    case "fill":
                         {
-                            Console.WriteLine(hr);
+                            string hr = "";
+                            for (int i = 0; i < Console.WindowWidth - 1; i++)
+                            {
+                                hr = hr + "█";
+                            }
+                            for (int i = 0; i < Console.WindowHeight; i++)
+                            {
+                                Console.WriteLine(hr);
+                            }
                         }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(String.Format("{0," +
-                               ((Console.WindowWidth / 2) +
-                               (aline.Length / 2)) +
-                               "}", aline));
+                        break;
+
+                    case "thunder":
+                        {
+                            soundPlayer = new SoundPlayer(Properties.Resources.Thunder);
+                            soundPlayer.Play();
+                        }
+                        break;
+
+                    case "wait":
+                        {
+                            Thread.Sleep(delay);
+                        }
+                        break;
+
+                    default:
+                        {
+                            Console.WriteLine(String.Format("{0," +
+                                             ((Console.WindowWidth / 2) +
+                                             (aline.Length / 2)) +
+                                             "}", aline));
+                        }
+                        break;
                 }
             }
-            Thread.Sleep(2000);
         }
 
         //First room of the game, Use this as the template
